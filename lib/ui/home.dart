@@ -114,87 +114,80 @@ class _MyHomeState extends State<MyHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        leading: IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () => _scaffoldKey.currentState.openDrawer()),
-        title: Text('Status Saver'),
-        backgroundColor: Colors.teal,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () {
-                Share.share(
-                    'check out my wa status downloader https://mastersam.io',
-                    subject: 'Look what I made!');
-              }),
-          IconButton(
-              icon: Icon(Icons.help_outline),
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Dialog(
-                        child: Container(
-                          height: 400,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Html(data: html),
-                                Expanded(
-                                  child: new Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: FlatButton(
-                                      child: Text(
-                                        'OK!',
-                                        style: TextStyle(color: Colors.green),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          leading: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () => _scaffoldKey.currentState.openDrawer()),
+          title: Text('Status Saver'),
+          backgroundColor: Colors.teal,
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.share),
+                onPressed: () {
+                  Share.share('', subject: 'Look what I made!');
+                }),
+            IconButton(
+                icon: Icon(Icons.help_outline),
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          child: Container(
+                            height: 400,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Html(data: html),
+                                  Expanded(
+                                    child: new Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: FlatButton(
+                                        child: Text(
+                                          'OK!',
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
                                       ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    });
-              })
-        ],
-        bottom: TabBar(tabs: [
-          Container(
-            height: 30.0,
-            child: Text(
-              'IMAGES',
-            ),
-          ),
-          Container(
-            height: 30.0,
-            child: Text(
-              'VIDEOS',
-            ),
-          ),
-        ]),
-      ),
-      body: DefaultTabController(
-        length: 2,
-        child: TabBarView(
-          children: [
-            ImageScreen(),
-            VideoScreen(),
+                        );
+                      });
+                })
           ],
+          bottom: TabBar(tabs: [
+            Container(
+              height: 30.0,
+              child: Text(
+                'IMAGES',
+              ),
+            ),
+            Container(
+              height: 30.0,
+              child: Text(
+                'VIDEOS',
+              ),
+            ),
+          ]),
         ),
-      ),
-      backgroundColor: Colors.white,
-      drawer: Drawer(
-        child: MyNavigationDrawer(),
+        body: Dashboard(),
+        backgroundColor: Colors.white,
+        drawer: Drawer(
+          child: MyNavigationDrawer(),
+        ),
       ),
     );
   }

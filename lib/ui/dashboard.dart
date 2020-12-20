@@ -12,14 +12,11 @@ class DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      body: DefaultTabController(
-        length: 2,
-        child: TabBarView(
-          children: [
-            ImageScreen(),
-            VideoScreen(),
-          ],
-        ),
+      body: TabBarView(
+        children: [
+          ImageScreen(),
+          VideoScreen(),
+        ],
       ),
     );
   }

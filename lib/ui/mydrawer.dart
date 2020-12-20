@@ -7,7 +7,7 @@ class MyNavigationDrawer extends StatelessWidget {
   final String version = '0.3+2';
 
   _launchURL() async {
-    const url = 'https://github.com/Mastersam07/wa_status_saver';
+    const url = 'https://github.com/walikhan226/status_saver_flutter';
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -89,7 +89,7 @@ class MyNavigationDrawer extends StatelessWidget {
             title: Text('Share With Friends'),
             onTap: () {
               // Share.share(
-              //     'check out my wa status downloader https://bit.ly/wa_status_downloader',
+              //     'check out my wa status downloader https://github.com/walikhan226/status_saver_flutter',
               //     subject: 'Look what I made!');
             },
           ),
