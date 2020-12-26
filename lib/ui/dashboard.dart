@@ -1,5 +1,5 @@
-import 'package:test123/ui/imageScreen.dart';
-import 'package:test123/ui/videoScreen.dart';
+import 'package:save_status_/ui/imageScreen.dart';
+import 'package:save_status_/ui/videoScreen.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -10,7 +10,6 @@ class Dashboard extends StatefulWidget {
 class DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: TabBarView(
         children: [

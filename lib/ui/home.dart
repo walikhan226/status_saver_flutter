@@ -1,12 +1,12 @@
-import 'package:test123/ui/dashboard.dart';
-import 'package:test123/ui/mydrawer.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:save_status_/ui/addmanager.dart';
+import 'package:save_status_/ui/dashboard.dart';
+import 'package:save_status_/ui/mydrawer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:share/share.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:test123/ui/imageScreen.dart';
-import 'package:test123/ui/videoScreen.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -109,6 +109,35 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
+  BannerAd _bannerAd;
+  void _loadBannerAd() {
+    _bannerAd
+      ..load()
+      ..show(anchorType: AnchorType.bottom);
+  }
+
+  Future<void> _initAdMob() {
+    // TODO: Initialize AdMob SDK
+    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _bannerAd = BannerAd(
+      adUnitId: AdManager.bannerAdUnitId,
+      size: AdSize.banner,
+    );
+    _loadBannerAd();
+  }
+
   var html =
       "<h3><b>How To Use?</b></h3><p>- Check the Desired Status/Story...</p><p>- Come Back to App, Click on any Image or Video to View...</p><p>- Click the Save Button...<br />The Image/Video is Instantly saved to your Galery :)</p><p>- You can also Use Multiple Saving. [to do]</p>";
 

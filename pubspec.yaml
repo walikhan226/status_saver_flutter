@@ -1,4 +1,4 @@
-name: test123
+name: save_status_
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -42,6 +42,9 @@ dependencies:
   flutter_file_manager: ^0.2.0
   path: 
   open_file: ^2.1.1
+  admob_flutter: ^1.0.1
+  firebase_admob: ^0.10.3
+
  
 
 dev_dependencies:

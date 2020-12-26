@@ -1,4 +1,4 @@
-import 'package:test123/utils/video_play.dart';
+import 'package:save_status_/utils/video_play.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:thumbnails/thumbnails.dart';
