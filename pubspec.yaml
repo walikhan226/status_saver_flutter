@@ -38,12 +38,15 @@ dependencies:
   esys_flutter_share: ^1.0.2
   thumbnails: ^1.0.1
   chewie: ^0.9.8+1
-  permission_handler: ^5.0.1
+  permission_handler: ^5.0.1+1
   flutter_file_manager: ^0.2.0
   path: 
   open_file: ^2.1.1
   admob_flutter: ^1.0.1
   firebase_admob: ^0.10.3
+  firebase_core:
+
+  
 
  
 

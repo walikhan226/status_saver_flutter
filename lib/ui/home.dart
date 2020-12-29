@@ -76,11 +76,29 @@ class MyAppState extends State<MyApp> {
               ),
               color: Colors.indigo,
               textColor: Colors.white,
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyHome()),
-                );
+              onPressed: () async {
+                var status = await Permission.storage.status;
+
+                if (status.isUndetermined) {
+                  // You can request multiple permissions at once.
+                  Map<Permission, PermissionStatus> statuses = await [
+                    Permission.storage,
+                  ].request();
+                  print(statuses[Permission
+                      .storage]); // it should print PermissionStatus.granted
+                }
+
+                if (status.isGranted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyHome()),
+                  );
+                } else {
+                  Map<Permission, PermissionStatus> statuses = await [
+                    Permission.storage,
+                  ].request();
+                  print(statuses[Permission.storage]);
+                }
               },
             )
           ],

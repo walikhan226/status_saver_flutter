@@ -14,7 +14,7 @@ class SaveScreen extends StatefulWidget {
 class _SaveScreenState extends State<SaveScreen> {
   //Declare Globaly
   String directory;
-  List file = new List();
+  List<io.FileSystemEntity> file = new List<io.FileSystemEntity>();
   @override
   void initState() {
     // TODO: implement initState
@@ -26,8 +26,9 @@ class _SaveScreenState extends State<SaveScreen> {
   void _listofFiles() async {
     directory = (await getApplicationDocumentsDirectory()).path;
     setState(() {
-      file = io.Directory("storage/emulated/0/StatusSaver")
-          .listSync(); //use your folder name insted of resume.
+      file = io.Directory("storage/emulated/0/StatusSaver").listSync();
+      file = file.reversed.toList();
+      //use your folder name insted of resume.
     });
   }
 
@@ -43,12 +44,19 @@ class _SaveScreenState extends State<SaveScreen> {
         ),
         body: Container(
           child: ListView.builder(
-              itemCount: file.length,
+              itemCount: file == null ? 0 : file.length,
               itemBuilder: (BuildContext context, int index) {
+                if (file.length == 0) {
+                  return Center(
+                    child: Text("No saved files exist"),
+                  );
+                }
+
                 return Card(
                   child: ListTile(
                     onTap: () {
                       OpenFile.open(file[index].path);
+                      print(file[index]);
                     },
                     title: Text(file[index]
                         .toString()

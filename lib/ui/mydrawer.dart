@@ -1,18 +1,44 @@
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/ui/savescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
 
-class MyNavigationDrawer extends StatelessWidget {
+class MyNavigationDrawer extends StatefulWidget {
+  @override
+  _MyNavigationDrawerState createState() => _MyNavigationDrawerState();
+}
+
+class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
   final String version = '0.3+2';
 
-  _launchURL() async {
-    const url = 'https://github.com/walikhan226/status_saver_flutter';
+  _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  loadRewardedAd() async {
+    await RewardedVideoAd.instance.load(
+      targetingInfo: MobileAdTargetingInfo(),
+      adUnitId: AdManager.rewardedAdUnitId,
+    );
+  }
+
+  @override
+  void initState() {
+    loadRewardedAd();
+    super.initState();
+    //RewardedVideoAd.instance.listener = _onRewardedAdEvent;
+  }
+
+  @override
+  void dispose() {
+    RewardedVideoAd.instance.listener = null;
+    super.dispose();
   }
 
   @override
@@ -21,30 +47,29 @@ class MyNavigationDrawer extends StatelessWidget {
       // Important: Remove any padding from the ListView.
       padding: EdgeInsets.zero,
       children: <Widget>[
-        UserAccountsDrawerHeader(
-          decoration: BoxDecoration(color: Colors.teal),
-          accountName: Text(
-            'Status Saver',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          accountEmail: Text('Version: $version'),
-          currentAccountPicture: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                fit: BoxFit.contain,
-                image: AssetImage('assets/images/logo.png'),
-              ),
+        Container(
+          height: MediaQuery.of(context).size.height / 6,
+          color: Colors.teal,
+          child: Center(
+            child: Text(
+              "Save Status",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: MediaQuery.of(context).size.width * 0.09),
             ),
           ),
         ),
+
         Card(
           child: ListTile(
             leading: IconTheme(
                 data: new IconThemeData(color: Color(0xff757575)),
                 child: Icon(Icons.perm_media)),
             title: Text('Premium'),
-            onTap: () {},
+            onTap: () async {
+              await RewardedVideoAd.instance.show();
+            },
           ),
         ),
         Card(
