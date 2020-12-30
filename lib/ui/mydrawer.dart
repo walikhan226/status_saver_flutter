@@ -61,38 +61,40 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
           ),
         ),
 
-        Card(
-          child: ListTile(
-            leading: IconTheme(
-                data: new IconThemeData(color: Color(0xff757575)),
-                child: Icon(Icons.perm_media)),
-            title: Text('Premium'),
-            onTap: () async {
-              await RewardedVideoAd.instance.show();
-            },
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: IconTheme(
-                data: new IconThemeData(color: Color(0xff757575)),
-                child: Icon(Icons.perm_media)),
-            title: Text('Downloaded Status'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SaveScreen()),
-              );
-            },
-          ),
-        ),
+        // Card(
+        //   child: ListTile(
+        //     leading: IconTheme(
+        //         data: new IconThemeData(color: Color(0xff757575)),
+        //         child: Icon(Icons.perm_media)),
+        //     title: Text('Premium'),
+        //     onTap: () async {
+        //       await RewardedVideoAd.instance.show();
+        //     },
+        //   ),
+        // ),
+        // Card(
+        //   child: ListTile(
+        //     leading: IconTheme(
+        //         data: new IconThemeData(color: Color(0xff757575)),
+        //         child: Icon(Icons.perm_media)),
+        //     title: Text('Downloaded Status'),
+        //     onTap: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => SaveScreen()),
+        //       );
+        //     },
+        //   ),
+        // ),
         Card(
           child: ListTile(
             leading: IconTheme(
                 data: new IconThemeData(color: Color(0xff757575)),
                 child: Icon(Icons.info)),
             title: Text('About Us'),
-            onTap: () {},
+            onTap: () {
+              _launchURL('http://remerse.com/');
+            },
           ),
         ),
         Card(

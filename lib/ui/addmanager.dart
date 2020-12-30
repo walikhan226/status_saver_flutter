@@ -21,15 +21,15 @@ class AdManager {
     }
   }
 
-  // static String get interstitialAdUnitId {
-  //   if (Platform.isAndroid) {
-  //     return "ca-app-pub-6637457000724205/5049612128";
-  //   } else if (Platform.isIOS) {
-  //     return "ca-app-pub-6637457000724205~9516482507";
-  //   } else {
-  //     throw new UnsupportedError("Unsupported platform");
-  //   }
-  // }
+  static String get interstitialAdUnitId {
+    if (Platform.isAndroid) {
+      return "ca-app-pub-6637457000724205/7195201809";
+    } else if (Platform.isIOS) {
+      return "ca-app-pub-6637457000724205/7195201809";
+    } else {
+      throw new UnsupportedError("Unsupported platform");
+    }
+  }
 
   static String get rewardedAdUnitId {
     if (Platform.isAndroid) {

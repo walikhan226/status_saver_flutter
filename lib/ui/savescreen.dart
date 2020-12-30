@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_file_manager/flutter_file_manager.dart';
 import 'dart:io' as io;
 import 'package:path/path.dart' as p;
+import 'package:thumbnails/thumbnails.dart';
 
 class SaveScreen extends StatefulWidget {
   @override
@@ -25,6 +26,7 @@ class _SaveScreenState extends State<SaveScreen> {
   // Make New Function
   void _listofFiles() async {
     directory = (await getApplicationDocumentsDirectory()).path;
+
     setState(() {
       file = io.Directory("storage/emulated/0/StatusSaver").listSync();
       file = file.reversed.toList();

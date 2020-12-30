@@ -1,6 +1,7 @@
 import 'package:save_status_/ui/imageScreen.dart';
 import 'package:save_status_/ui/videoScreen.dart';
 import 'package:flutter/material.dart';
+import 'viewdownloads.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -12,10 +13,7 @@ class DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
-        children: [
-          ImageScreen(),
-          VideoScreen(),
-        ],
+        children: [ImageScreen(), VideoScreen(), ViewDownloadFolder()],
       ),
     );
   }

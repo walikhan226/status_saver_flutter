@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/ui/dashboard.dart';
@@ -142,18 +145,71 @@ class _MyHomeState extends State<MyHome> {
   @override
   void dispose() {
     _bannerAd?.dispose();
-
+    myInterstitial?.dispose();
     super.dispose();
+  }
+
+  InterstitialAd myInterstitial;
+
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
+      },
+    );
+  }
+
+  Timer _timer;
+  int _start = 30;
+
+  void startTimer1() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          showInterstitialAd();
+          print("timer end");
+          timer.cancel();
+        } else {
+          if (_start != 0) {
+            _start--;
+          }
+        }
+      },
+    );
   }
 
   @override
   void initState() {
     super.initState();
+    _initAdMob();
     _bannerAd = BannerAd(
       adUnitId: AdManager.bannerAdUnitId,
       size: AdSize.banner,
     );
+    startTimer1();
+    myInterstitial = buildInterstitialAd()..load();
     _loadBannerAd();
+  }
+
+  void showInterstitialAd() {
+    myInterstitial..show();
+  }
+
+  void showRandomInterstitialAd() {
+    Random r = new Random();
+    bool value = r.nextBool();
+
+    if (value == true) {
+      myInterstitial..show();
+    }
   }
 
   var html =
@@ -162,20 +218,21 @@ class _MyHomeState extends State<MyHome> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
           leading: IconButton(
               icon: Icon(Icons.menu),
               onPressed: () => _scaffoldKey.currentState.openDrawer()),
-          title: Text('Status Saver'),
+          title: Text('Save Status'),
           backgroundColor: Colors.teal,
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.share),
                 onPressed: () {
-                  Share.share('', subject: 'Look what I made!');
+                  //Share.share('', subject: 'Look what I made!');
+                  showInterstitialAd();
                 }),
             IconButton(
                 icon: Icon(Icons.help_outline),
@@ -220,12 +277,24 @@ class _MyHomeState extends State<MyHome> {
               height: 30.0,
               child: Text(
                 'IMAGES',
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.035),
               ),
             ),
             Container(
               height: 30.0,
               child: Text(
                 'VIDEOS',
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.035),
+              ),
+            ),
+            Container(
+              height: 30.0,
+              child: Text(
+                'DOWNLOADED',
+                style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.035),
               ),
             ),
           ]),
