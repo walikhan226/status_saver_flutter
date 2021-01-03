@@ -30,6 +30,7 @@ class _ViewDownloadFolderState extends State<ViewDownloadFolder> {
                     MaterialPageRoute(
                         builder: (context) => Scaffold(
                               appBar: AppBar(
+                                backgroundColor: Colors.teal,
                                 title: Text("Images"),
                               ),
                               body: ImageScreen(),
@@ -48,6 +49,7 @@ class _ViewDownloadFolderState extends State<ViewDownloadFolder> {
                     MaterialPageRoute(
                         builder: (context) => Scaffold(
                               appBar: AppBar(
+                                backgroundColor: Colors.teal,
                                 title: Text("Videos"),
                               ),
                               body: VideoScreen(),

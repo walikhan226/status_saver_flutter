@@ -1,3 +1,6 @@
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/utils/video_controller.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -12,14 +15,41 @@ class PlayStatus extends StatefulWidget {
 }
 
 class _PlayStatusState extends State<PlayStatus> {
+  InterstitialAd myInterstitial;
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
+      },
+    );
+  }
+
+  Future<void> _initAdMob() {
+    // TODO: Initialize AdMob SDK
+    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+  }
+
+  void showInterstitialAd() {
+    myInterstitial..show();
+  }
+
   @override
   void initState() {
     super.initState();
-    print('Video file you are looking for:' + widget.videoFile);
+    _initAdMob();
+    myInterstitial = buildInterstitialAd()..load();
   }
 
+  @override
   void dispose() {
     super.dispose();
+    myInterstitial?.dispose();
   }
 
   void _onLoading(bool t, String str) {
@@ -118,20 +148,50 @@ class _PlayStatusState extends State<PlayStatus> {
               style: TextStyle(fontSize: 16.0),
             ), //`Text` to display
             onPressed: () async {
-              final folderName = "StatusSaver";
+              final folderName = "SaveStatus";
               final path = Directory("storage/emulated/0/$folderName");
               if ((await path.exists())) {
+                try {
+                  showInterstitialAd();
+                } catch (e) {}
+
                 File file = File(widget.videoFile);
                 String curDate = DateTime.now().toString();
+
                 File newImage = await file
-                    .copy('storage/emulated/0/StatusSaver/vid$curDate.MP4');
+                    .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
+                    .then((value) {
+                  Fluttertoast.showToast(
+                      msg: "Video has been saved to local storage",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black,
+                      fontSize: 16.0);
+                });
+
                 print(newImage);
               } else {
+                try {
+                  showInterstitialAd();
+                } catch (e) {}
                 path.create();
                 File file = File(widget.videoFile);
                 String curDate = DateTime.now().toString();
+
                 File newImage = await file
-                    .copy('storage/emulated/0/StatusSaver/vid$curDate.MP4');
+                    .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
+                    .then((value) {
+                  Fluttertoast.showToast(
+                      msg: "Video has been saved to local storage",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black,
+                      fontSize: 16.0);
+                });
                 print(newImage);
               }
             },

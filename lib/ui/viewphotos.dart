@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:async';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart' as path;
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter_fab_dialer/flutter_fab_dialer.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart' as eshare;
 
 import 'package:path_provider/path_provider.dart';
+import 'package:save_status_/ui/addmanager.dart';
 
 class ViewPhotos extends StatefulWidget {
   final String imgPath;
@@ -19,19 +22,56 @@ class ViewPhotos extends StatefulWidget {
 }
 
 class _ViewPhotosState extends State<ViewPhotos> {
+  InterstitialAd myInterstitial;
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
+      },
+    );
+  }
+
+  void showInterstitialAd() {
+    myInterstitial..show();
+  }
+
+  Future<void> _initAdMob() {
+    // TODO: Initialize AdMob SDK
+    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initAdMob();
+    myInterstitial = buildInterstitialAd()..load();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    myInterstitial?.dispose();
+  }
+
   var filePath;
   final String imgShare = "Image.file(File(widget.imgPath),)";
 
   Future<void> _shareImage() async {
     try {
       final ByteData bytes = await rootBundle.load(
-        "Image.file(File(widget.imgPath),)",
+        widget.imgPath,
       );
       await eshare.Share.file(
-        'esys image',
-        'esys.png',
+        'image',
+        'img.png',
         bytes.buffer.asUint8List(),
-        imgShare,
+        'image/png',
       );
     } catch (e) {
       print('error: $e');
@@ -138,20 +178,46 @@ class _ViewPhotosState extends State<ViewPhotos> {
       new FabMiniMenuItem.withText(
           new Icon(Icons.sd_storage), Colors.teal, 4.0, "Button menu",
           () async {
-        final folderName = "StatusSaver";
+        final folderName = "SaveStatus";
         final path = Directory("storage/emulated/0/$folderName");
         if ((await path.exists())) {
+          try {
+            showInterstitialAd();
+          } catch (e) {}
           File file = File(widget.imgPath);
           String curDate = DateTime.now().toString();
-          File newImage =
-              await file.copy('storage/emulated/0/StatusSaver/pic$curDate.jpg');
+          File newImage = await file
+              .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
+              .then((value) {
+            Fluttertoast.showToast(
+                msg: "Image has been saved to local storage",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                fontSize: 16.0);
+          });
           print(newImage);
         } else {
+          try {
+            showInterstitialAd();
+          } catch (e) {}
           path.create();
           File file = File(widget.imgPath);
           String curDate = DateTime.now().toString();
-          File newImage =
-              await file.copy('storage/emulated/0/StatusSaver/pic$curDate.jpg');
+          File newImage = await file
+              .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
+              .then((value) {
+            Fluttertoast.showToast(
+                msg: "Image has been saved to local storage",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.white,
+                textColor: Colors.black,
+                fontSize: 16.0);
+          });
           print(newImage);
         }
       }, "Save", Colors.black, Colors.white, true),

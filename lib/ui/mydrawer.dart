@@ -104,7 +104,8 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
                 child: Icon(Icons.rate_review)),
             title: Text('Rate Us'),
             onTap: () {
-              // _launchURL();
+              _launchURL(
+                  'https://play.google.com/store/apps/details?id=com.remerse.savestatus');
             },
           ),
         ),
@@ -115,9 +116,9 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
                 child: Icon(Icons.share)),
             title: Text('Share With Friends'),
             onTap: () {
-              // Share.share(
-              //     'check out my wa status downloader https://github.com/walikhan226/status_saver_flutter',
-              //     subject: 'Look what I made!');
+              Share.share(
+                  'https://play.google.com/store/apps/details?id=com.remerse.savestatus',
+                  subject: '');
             },
           ),
         ),

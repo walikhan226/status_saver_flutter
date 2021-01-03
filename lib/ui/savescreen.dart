@@ -28,7 +28,7 @@ class _SaveScreenState extends State<SaveScreen> {
     directory = (await getApplicationDocumentsDirectory()).path;
 
     setState(() {
-      file = io.Directory("storage/emulated/0/StatusSaver").listSync();
+      file = io.Directory("storage/emulated/0/SaveStatus").listSync();
       file = file.reversed.toList();
       //use your folder name insted of resume.
     });

@@ -194,7 +194,7 @@ class _MyHomeState extends State<MyHome> {
       adUnitId: AdManager.bannerAdUnitId,
       size: AdSize.banner,
     );
-    startTimer1();
+    //startTimer1();
     myInterstitial = buildInterstitialAd()..load();
     _loadBannerAd();
   }
@@ -231,8 +231,13 @@ class _MyHomeState extends State<MyHome> {
             IconButton(
                 icon: Icon(Icons.share),
                 onPressed: () {
-                  //Share.share('', subject: 'Look what I made!');
-                  showInterstitialAd();
+                  Share.share(
+                      'https://play.google.com/store/apps/details?id=com.remerse.savestatus',
+                      subject: '');
+
+                  try {
+                    showInterstitialAd();
+                  } catch (e) {}
                 }),
             IconButton(
                 icon: Icon(Icons.help_outline),
