@@ -1,17 +1,22 @@
+import 'package:save_status_/downloadedscreens/video_view.dart';
 import 'package:save_status_/utils/video_play.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:thumbnails/thumbnails.dart';
 
-final Directory _videoDir =
-    new Directory('/storage/emulated/0/WhatsApp/Media/.Statuses');
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class VideoScreen extends StatefulWidget {
+  final String path;
+  final String state;
+  VideoScreen({@required this.path, @required this.state});
   @override
   VideoScreenState createState() => new VideoScreenState();
 }
 
 class VideoScreenState extends State<VideoScreen> {
+  Directory _videoDir;
   @override
   void initState() {
     super.initState();
@@ -19,6 +24,7 @@ class VideoScreenState extends State<VideoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _videoDir = Directory(widget.path);
     if (!Directory("${_videoDir.path}").existsSync()) {
       return Container(
         padding: EdgeInsets.only(bottom: 60.0),
@@ -30,28 +36,49 @@ class VideoScreenState extends State<VideoScreen> {
         ),
       );
     } else {
-      return VideoGrid(directory: _videoDir);
+      return VideoGrid(
+        directory: _videoDir,
+        state: widget.state,
+      );
     }
   }
 }
 
 class VideoGrid extends StatefulWidget {
   final Directory directory;
-
-  const VideoGrid({Key key, this.directory}) : super(key: key);
+  final String state;
+  const VideoGrid({this.directory, this.state});
 
   @override
   _VideoGridState createState() => _VideoGridState();
 }
 
 class _VideoGridState extends State<VideoGrid> {
-  _getImage(videoPathUrl) async {
-    //await Future.delayed(Duration(milliseconds: 500));
+  Future<String> _getImage(String videoPathUrl) async {
+    try {
+      await Future.delayed(Duration(milliseconds: 500));
+
+      return await Thumbnails.getThumbnail(
+          videoFile: videoPathUrl,
+          imageType:
+              ThumbFormat.PNG, //this image will store in created folderpath
+          quality: 30);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<String> getImage(videoPathUrl) async {
+    print(videoPathUrl);
+    var appDocDir = await getApplicationDocumentsDirectory();
+    final folderPath = appDocDir.path;
     String thumb = await Thumbnails.getThumbnail(
+        thumbnailFolder: folderPath,
         videoFile: videoPathUrl,
         imageType:
             ThumbFormat.PNG, //this image will store in created folderpath
-        quality: 10);
+        quality: 30);
+    print(" Thump is " + thumb);
     return thumb;
   }
 
@@ -60,7 +87,7 @@ class _VideoGridState extends State<VideoGrid> {
     var videoList = widget.directory
         .listSync()
         .map((item) => item.path)
-        .where((item) => item.endsWith(".mp4"))
+        .where((item) => item.endsWith(".MP4") || item.endsWith(".mp4"))
         .toList(growable: false);
 
     if (videoList != null) {
@@ -75,13 +102,29 @@ class _VideoGridState extends State<VideoGrid> {
               return Container(
                 padding: EdgeInsets.all(10.0),
                 child: InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                        builder: (context) => new PlayStatus(
-                              videoFile: videoList[index],
-                            )),
-                  ),
+                  onTap: () async {
+                    if (widget.state == 'main') {
+                      Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => new PlayStatus(
+                                  videoFile: videoList[index],
+                                )),
+                      );
+                    }
+
+                    if (widget.state == 'download') {
+                      var val = await Navigator.push(
+                        context,
+                        new MaterialPageRoute(
+                            builder: (context) => new ViewPlay(
+                                  videoFile: videoList[index],
+                                )),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    }
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -102,8 +145,12 @@ class _VideoGridState extends State<VideoGrid> {
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
                     child: FutureBuilder(
-                        future: _getImage(videoList[index]),
-                        builder: (context, snapshot) {
+                        future: getImage(videoList[index]),
+                        builder: (context, AsyncSnapshot<String> snapshot) {
+                          if (snapshot.hasError) {
+                            print("This error " + snapshot.error);
+                          }
+
                           if (snapshot.connectionState ==
                               ConnectionState.done) {
                             if (snapshot.hasData) {
@@ -120,17 +167,32 @@ class _VideoGridState extends State<VideoGrid> {
                                       left: 10.0, right: 10.0),
                                   child: RaisedButton(
                                     child: Text("Play Video"),
-                                    color: Colors.indigo,
+                                    color: Color(0xFF096157),
                                     textColor: Colors.white,
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        new MaterialPageRoute(
-                                            builder: (context) =>
-                                                new PlayStatus(
-                                                  videoFile: videoList[index],
-                                                )),
-                                      );
+                                    onPressed: () async {
+                                      if (widget.state == 'main') {
+                                        Navigator.push(
+                                          context,
+                                          new MaterialPageRoute(
+                                              builder: (context) =>
+                                                  new PlayStatus(
+                                                    videoFile: videoList[index],
+                                                  )),
+                                        );
+                                      }
+
+                                      if (widget.state == 'download') {
+                                        var val = await Navigator.push(
+                                          context,
+                                          new MaterialPageRoute(
+                                              builder: (context) =>
+                                                  new ViewPlay(
+                                                    videoFile: videoList[index],
+                                                  )),
+                                        ).then((value) {
+                                          setState(() {});
+                                        });
+                                      }
                                     },
                                   ),
                                 ),

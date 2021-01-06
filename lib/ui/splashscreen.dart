@@ -42,6 +42,7 @@ class SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF096157),
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -54,7 +55,7 @@ class SplashScreenState extends State<SplashScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               new Image.asset(
-                'assets/images/logo.png',
+                'assets/images/icon1.png',
                 width: animation.value * 200,
                 height: animation.value * 200,
               ),
@@ -64,8 +65,9 @@ class SplashScreenState extends State<SplashScreen>
               Text(
                 "SAVE STATUS",
                 style: TextStyle(
-                  fontSize: animation.value * 30,
-                ),
+                    fontSize: animation.value * 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               )
             ],
           ),

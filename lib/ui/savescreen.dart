@@ -41,7 +41,7 @@ class _SaveScreenState extends State<SaveScreen> {
       title: 'Saved Files',
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.teal,
+          backgroundColor: Color(0xFF096157),
           title: Text("Saved Files"),
         ),
         body: Container(

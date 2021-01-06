@@ -1,6 +1,6 @@
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:save_status_/ui/addmanager.dart';
-import 'package:save_status_/ui/savescreen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
@@ -48,15 +48,31 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
       padding: EdgeInsets.zero,
       children: <Widget>[
         Container(
+          height: 30,
+          color: Color(0xFF096157),
+        ),
+        Container(
           height: MediaQuery.of(context).size.height / 6,
-          color: Colors.teal,
+          color: Color(0xFF096157),
           child: Center(
-            child: Text(
-              "Save Status",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: MediaQuery.of(context).size.width * 0.09),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 10,
+                ),
+                Image.asset("assets/images/icon.png",
+                    height: MediaQuery.of(context).size.height * 0.09),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  "Save Status",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: MediaQuery.of(context).size.width * 0.09),
+                ),
+              ],
             ),
           ),
         ),

@@ -1,16 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:path/path.dart';
+import 'package:save_status_/downloadedscreens/image_view.dart';
 import 'package:save_status_/ui/imageScreen.dart';
+
 import 'package:save_status_/ui/videoScreen.dart';
-import 'package:save_status_/ui/viewphotos.dart';
-import 'package:save_status_/utils/video_play.dart';
-import 'package:thumbnails/thumbnails.dart';
+
 import 'package:flutter/material.dart';
 
 class ViewDownloadFolder extends StatefulWidget {
+  String path;
+  String state;
+  ViewDownloadFolder({@required this.path, @required this.state});
+
   @override
   _ViewDownloadFolderState createState() => _ViewDownloadFolderState();
 }
@@ -22,37 +24,55 @@ class _ViewDownloadFolderState extends State<ViewDownloadFolder> {
       child: ListView(
         children: [
           Card(
-            color: Colors.grey[300],
+            elevation: 5,
+            color: Colors.white,
             child: ListTile(
+              contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+              leading: Image.asset("assets/images/imageicon.png"),
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => Scaffold(
                               appBar: AppBar(
-                                backgroundColor: Colors.teal,
-                                title: Text("Images"),
+                                backgroundColor: Color(0xFF096157),
+                                title: Text(
+                                  "Images",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              body: ImageScreen(),
+                              body: ImageScreen(
+                                path: widget.path,
+                                state: widget.state,
+                              ),
                             )));
               },
-              leading: Text("Images"),
+              title: Text("Images"),
             ),
           ),
           Card(
-            color: Colors.grey[300],
+            elevation: 5,
+            color: Colors.white,
             child: ListTile(
-              leading: Text("Videos"),
-              onTap: () {
-                Navigator.push(
+              leading: Image.asset("assets/images/videoicon.png"),
+              contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+              title: Text("Videos"),
+              onTap: () async {
+                await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => Scaffold(
                               appBar: AppBar(
-                                backgroundColor: Colors.teal,
-                                title: Text("Videos"),
+                                backgroundColor: Color(0xFF096157),
+                                title: Text(
+                                  "Videos",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              body: VideoScreen(),
+                              body: VideoScreen(
+                                path: widget.path,
+                                state: widget.state,
+                              ),
                             )));
               },
             ),

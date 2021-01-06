@@ -4,24 +4,22 @@ import 'dart:async';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_share/flutter_share.dart';
+
 import 'package:path/path.dart' as path;
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:flutter_fab_dialer/flutter_fab_dialer.dart';
+
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:save_status_/ui/addmanager.dart';
 
-class ViewPhotos extends StatefulWidget {
+class ImageView extends StatefulWidget {
   final String imgPath;
-  ViewPhotos(this.imgPath);
-
+  ImageView(this.imgPath);
   @override
-  _ViewPhotosState createState() => _ViewPhotosState();
+  _ImageViewState createState() => _ImageViewState();
 }
 
-class _ViewPhotosState extends State<ViewPhotos> {
+class _ImageViewState extends State<ImageView> {
   InterstitialAd myInterstitial;
   InterstitialAd buildInterstitialAd() {
     return InterstitialAd(
@@ -46,11 +44,19 @@ class _ViewPhotosState extends State<ViewPhotos> {
     return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
   }
 
+  loadadd() async {
+    try {
+      myInterstitial = buildInterstitialAd()..load();
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _initAdMob();
-    myInterstitial = buildInterstitialAd()..load();
+    this.loadadd();
   }
 
   @override
@@ -179,8 +185,6 @@ class _ViewPhotosState extends State<ViewPhotos> {
     //       } catch (e) {}
     //       File file = File(widget.imgPath);
     //       String curDate = DateTime.now().toString();
-    //       curDate = curDate.replaceAll(' ', '');
-    //       print(curDate);
     //       File newImage = await file
     //           .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
     //           .then((value) {
@@ -201,7 +205,6 @@ class _ViewPhotosState extends State<ViewPhotos> {
     //       path.create();
     //       File file = File(widget.imgPath);
     //       String curDate = DateTime.now().toString();
-    //       curDate = curDate.replaceAll(' ', '');
     //       File newImage = await file
     //           .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
     //           .then((value) {
@@ -218,79 +221,37 @@ class _ViewPhotosState extends State<ViewPhotos> {
     //     }
     //   }, "Save", Colors.black, Colors.white, true),
     //   new FabMiniMenuItem.withText(
-    //       new Icon(Icons.share), Color(0xFF096157), 4.0, "Button menu",
-    //       () async {
+    //       new Icon(Icons.share), Color(0xFF096157), 4.0, "Button menu", () async {
     //     try {
     //       _shareImage();
     //     } catch (e) {}
     //   }, "Share", Colors.black, Colors.white, true),
-    // ];
-
+    // ]
     return Scaffold(
       backgroundColor: Colors.black12,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          color: Colors.indigo,
-          icon: Icon(
-            Icons.close,
-            color: Colors.white,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         actions: [
           IconButton(
             color: Colors.indigo,
             icon: Icon(
-              Icons.download_rounded,
+              Icons.delete,
               color: Colors.white,
             ),
             onPressed: () async {
-              final folderName = "SaveStatus";
-              final path = Directory("storage/emulated/0/$folderName");
-              if ((await path.exists())) {
-                try {
-                  showInterstitialAd();
-                } catch (e) {}
-                File file = File(widget.imgPath);
-                String curDate = DateTime.now().toString();
-                curDate = curDate.replaceAll(' ', '');
-                print(curDate);
-                File newImage = await file
-                    .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
-                    .then((value) {
-                  Fluttertoast.showToast(
-                      msg: "Image has been saved to local storage",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black,
-                      fontSize: 16.0);
-                });
-                print(newImage);
-              } else {
-                try {
-                  showInterstitialAd();
-                } catch (e) {}
-                path.create();
-                File file = File(widget.imgPath);
-                String curDate = DateTime.now().toString();
-                curDate = curDate.replaceAll(' ', '');
-                File newImage = await file
-                    .copy('storage/emulated/0/SaveStatus/pic$curDate.jpg')
-                    .then((value) {
-                  Fluttertoast.showToast(
-                      msg: "Image has been saved to local storage",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black,
-                      fontSize: 16.0);
-                });
-                print(newImage);
+              try {
+                var file = File(widget.imgPath);
+
+                if (await file.exists()) {
+                  await file.delete().then((value) {
+                    Navigator.pop(context);
+
+                    //  setState(() {});
+                  });
+                }
+              } catch (e) {
+                print(e);
               }
             },
           ),
@@ -300,11 +261,19 @@ class _ViewPhotosState extends State<ViewPhotos> {
               Icons.share,
               color: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               _shareImage();
             },
           ),
         ],
+        leading: IconButton(
+          color: Colors.indigo,
+          icon: Icon(
+            Icons.close,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SizedBox.expand(
         child: Stack(
@@ -320,7 +289,6 @@ class _ViewPhotosState extends State<ViewPhotos> {
               ),
             ),
             // new FabDialer(
-
             //     _fabMiniMenuItemList, Color(0xFF096157), new Icon(Icons.add)),
           ],
         ),

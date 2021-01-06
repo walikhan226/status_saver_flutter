@@ -9,11 +9,25 @@ class Dashboard extends StatefulWidget {
 }
 
 class DashboardState extends State<Dashboard> {
+  final path = '/storage/emulated/0/WhatsApp/Media/.Statuses';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
-        children: [ImageScreen(), VideoScreen(), ViewDownloadFolder()],
+        children: [
+          ImageScreen(
+            path: this.path,
+            state: 'main',
+          ),
+          VideoScreen(
+            state: 'main',
+            path: this.path,
+          ),
+          ViewDownloadFolder(
+            state: 'download',
+            path: '/storage/emulated/0/SaveStatus',
+          )
+        ],
       ),
     );
   }

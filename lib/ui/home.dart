@@ -138,7 +138,6 @@ class _MyHomeState extends State<MyHome> {
   }
 
   Future<void> _initAdMob() {
-    // TODO: Initialize AdMob SDK
     return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
   }
 
@@ -226,7 +225,7 @@ class _MyHomeState extends State<MyHome> {
               icon: Icon(Icons.menu),
               onPressed: () => _scaffoldKey.currentState.openDrawer()),
           title: Text('Save Status'),
-          backgroundColor: Colors.teal,
+          backgroundColor: Color(0xFF096157),
           actions: <Widget>[
             IconButton(
                 icon: Icon(Icons.share),
@@ -277,32 +276,35 @@ class _MyHomeState extends State<MyHome> {
                       });
                 })
           ],
-          bottom: TabBar(tabs: [
-            Container(
-              height: 30.0,
-              child: Text(
-                'IMAGES',
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.035),
-              ),
-            ),
-            Container(
-              height: 30.0,
-              child: Text(
-                'VIDEOS',
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.035),
-              ),
-            ),
-            Container(
-              height: 30.0,
-              child: Text(
-                'DOWNLOADED',
-                style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.035),
-              ),
-            ),
-          ]),
+          bottom: TabBar(
+              indicatorColor: Colors.white,
+              labelColor: Colors.white,
+              tabs: [
+                Container(
+                  height: 30.0,
+                  child: Text(
+                    'IMAGES',
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.035),
+                  ),
+                ),
+                Container(
+                  height: 30.0,
+                  child: Text(
+                    'VIDEOS',
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.035),
+                  ),
+                ),
+                Container(
+                  height: 30.0,
+                  child: Text(
+                    'DOWNLOADED',
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.035),
+                  ),
+                ),
+              ]),
         ),
         body: Dashboard(),
         backgroundColor: Colors.white,

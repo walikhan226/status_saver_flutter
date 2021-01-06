@@ -1,20 +1,26 @@
+import 'dart:io';
+
 import 'package:firebase_admob/firebase_admob.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/utils/video_controller.dart';
-import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+
+import 'package:esys_flutter_share/esys_flutter_share.dart';
+import '../utils/video_controller.dart';
+
 import 'package:video_player/video_player.dart';
 
-class PlayStatus extends StatefulWidget {
-  String videoFile;
-  PlayStatus({this.videoFile});
+class ViewPlay extends StatefulWidget {
+  final String videoFile;
+  ViewPlay({this.videoFile});
   @override
-  _PlayStatusState createState() => new _PlayStatusState();
+  _ViewPlayState createState() => _ViewPlayState();
 }
 
-class _PlayStatusState extends State<PlayStatus> {
+class _ViewPlayState extends State<ViewPlay> {
   InterstitialAd myInterstitial;
   InterstitialAd buildInterstitialAd() {
     return InterstitialAd(
@@ -50,6 +56,18 @@ class _PlayStatusState extends State<PlayStatus> {
   void dispose() {
     super.dispose();
     myInterstitial?.dispose();
+  }
+
+  Future<void> sharevideo() async {
+    try {
+      final ByteData bytes = await rootBundle.load(widget.videoFile);
+
+      await Share.file(
+          'video', 'esys.mp4', bytes.buffer.asUint8List(), 'video/MP4',
+          text: '');
+    } catch (e) {
+      print('error: $e');
+    }
   }
 
   void _onLoading(bool t, String str) {
@@ -136,73 +154,102 @@ class _PlayStatusState extends State<PlayStatus> {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Container(
-          padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
-          child: FlatButton.icon(
-            color: Color(0xFF096157),
-            textColor: Colors.white,
-            icon: Icon(Icons.file_download),
-            padding: EdgeInsets.all(10.0),
-            label: Text(
-              'Download',
-              style: TextStyle(fontSize: 16.0),
-            ), //`Text` to display
+
+        actions: [
+          IconButton(
+            color: Colors.indigo,
+            icon: Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
             onPressed: () async {
-              final folderName = "SaveStatus";
-              final path = Directory("storage/emulated/0/$folderName");
-              if ((await path.exists())) {
-                try {
-                  showInterstitialAd();
-                } catch (e) {}
+              try {
+                var file = File(widget.videoFile);
 
-                File file = File(widget.videoFile);
-                String curDate = DateTime.now().toString();
-                curDate = curDate.replaceAll(' ', '');
-                curDate = curDate.replaceAll('.', '');
-                curDate = curDate.replaceAll(':', '');
-                curDate = curDate.replaceAll('-', '');
-                File newImage = await file
-                    .copy('storage/emulated/0/SaveStatus/vid$curDate.mp4')
-                    .then((value) {
-                  Fluttertoast.showToast(
-                      msg: "Video has been saved to local storage",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black,
-                      fontSize: 16.0);
-                });
+                if (await file.exists()) {
+                  await file.delete().then((value) {
+                    Navigator.pop(context);
 
-                print(newImage);
-              } else {
-                try {
-                  showInterstitialAd();
-                } catch (e) {}
-                path.create();
-                File file = File(widget.videoFile);
-                String curDate = DateTime.now().toString();
-                curDate = curDate.replaceAll(' ', '');
-                curDate = curDate.replaceAll('.', '');
-                curDate = curDate.replaceAll(':', '');
-                curDate = curDate.replaceAll('-', '');
-                File newImage = await file
-                    .copy('storage/emulated/0/SaveStatus/vid$curDate.mp4')
-                    .then((value) {
-                  Fluttertoast.showToast(
-                      msg: "Video has been saved to local storage",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black,
-                      fontSize: 16.0);
-                });
-                print(newImage);
+                    setState(() {});
+                  });
+                }
+              } catch (e) {
+                print(e);
               }
             },
           ),
-        ),
+          IconButton(
+            color: Colors.indigo,
+            icon: Icon(
+              Icons.share,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              sharevideo();
+            },
+          ),
+        ],
+        // title: Container(
+        //   padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
+        //   child: FlatButton.icon(
+        //     color: Colors.indigo,
+        //     textColor: Colors.white,
+        //     icon: Icon(Icons.file_download),
+        //     padding: EdgeInsets.all(10.0),
+        //     label: Text(
+        //       'Download',
+        //       style: TextStyle(fontSize: 16.0),
+        //     ), //`Text` to display
+        //     onPressed: () async {
+        //       final folderName = "SaveStatus";
+        //       final path = Directory("storage/emulated/0/$folderName");
+        //       if ((await path.exists())) {
+        //         try {
+        //           showInterstitialAd();
+        //         } catch (e) {}
+
+        //         File file = File(widget.videoFile);
+        //         String curDate = DateTime.now().toString();
+
+        //         File newImage = await file
+        //             .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
+        //             .then((value) {
+        //           Fluttertoast.showToast(
+        //               msg: "Video has been saved to local storage",
+        //               toastLength: Toast.LENGTH_SHORT,
+        //               gravity: ToastGravity.CENTER,
+        //               timeInSecForIosWeb: 1,
+        //               backgroundColor: Colors.white,
+        //               textColor: Colors.black,
+        //               fontSize: 16.0);
+        //         });
+
+        //         print(newImage);
+        //       } else {
+        //         try {
+        //           showInterstitialAd();
+        //         } catch (e) {}
+        //         path.create();
+        //         File file = File(widget.videoFile);
+        //         String curDate = DateTime.now().toString();
+
+        //         File newImage = await file
+        //             .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
+        //             .then((value) {
+        //           Fluttertoast.showToast(
+        //               msg: "Video has been saved to local storage",
+        //               toastLength: Toast.LENGTH_SHORT,
+        //               gravity: ToastGravity.CENTER,
+        //               timeInSecForIosWeb: 1,
+        //               backgroundColor: Colors.white,
+        //               textColor: Colors.black,
+        //               fontSize: 16.0);
+        //         });
+        //         print(newImage);
+        //       }
+        //     },
+        //   ),
+        // ),
       ),
       body: Container(
         child: StatusVideo(
