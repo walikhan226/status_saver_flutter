@@ -5,13 +5,8 @@ import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path/path.dart' as path;
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:flutter_fab_dialer/flutter_fab_dialer.dart';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
-
-import 'package:path_provider/path_provider.dart';
 import 'package:save_status_/ui/addmanager.dart';
+import 'package:share/share.dart';
 
 class ViewPhotos extends StatefulWidget {
   final String imgPath;
@@ -59,17 +54,17 @@ class _ViewPhotosState extends State<ViewPhotos> {
     myInterstitial?.dispose();
   }
 
-  Future<void> _shareImage() async {
-    print(widget.imgPath);
-    try {
-      final ByteData bytes = await rootBundle.load(widget.imgPath);
-      await Share.file(
-          'image', 'img.jpg', bytes.buffer.asUint8List(), 'image/jpg',
-          text: 'My optional text.');
-    } catch (e) {
-      print('error: $e');
-    }
-  }
+  // Future<void> _shareImage() async {
+  //   print(widget.imgPath);
+  //   try {
+  //     final ByteData bytes = await rootBundle.load(widget.imgPath);
+  //     await Share.file(
+  //         'image', 'img.jpg', bytes.buffer.asUint8List(), 'image/jpg',
+  //         text: 'My optional text.');
+  //   } catch (e) {
+  //     print('error: $e');
+  //   }
+  // }
 
   final LinearGradient backgroundGradient = new LinearGradient(
     colors: [
@@ -301,7 +296,9 @@ class _ViewPhotosState extends State<ViewPhotos> {
               color: Colors.white,
             ),
             onPressed: () {
-              _shareImage();
+              try {
+                Share.shareFiles([widget.imgPath], text: 'picture');
+              } catch (e) {}
             },
           ),
         ],

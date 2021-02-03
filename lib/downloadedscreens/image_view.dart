@@ -8,9 +8,8 @@ import 'package:flutter_share/flutter_share.dart';
 
 import 'package:path/path.dart' as path;
 
-import 'package:esys_flutter_share/esys_flutter_share.dart';
-
 import 'package:save_status_/ui/addmanager.dart';
+import 'package:share/share.dart';
 
 class ImageView extends StatefulWidget {
   final String imgPath;
@@ -68,10 +67,7 @@ class _ImageViewState extends State<ImageView> {
   Future<void> _shareImage() async {
     print(widget.imgPath);
     try {
-      final ByteData bytes = await rootBundle.load(widget.imgPath);
-      await Share.file(
-          'image', 'img.jpg', bytes.buffer.asUint8List(), 'image/jpg',
-          text: 'My optional text.');
+      Share.shareFiles([widget.imgPath], text: 'picture');
     } catch (e) {
       print('error: $e');
     }

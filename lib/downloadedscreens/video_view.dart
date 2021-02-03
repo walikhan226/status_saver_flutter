@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/utils/video_controller.dart';
 
-import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:share/share.dart';
 import '../utils/video_controller.dart';
 
 import 'package:video_player/video_player.dart';
@@ -60,11 +60,7 @@ class _ViewPlayState extends State<ViewPlay> {
 
   Future<void> sharevideo() async {
     try {
-      final ByteData bytes = await rootBundle.load(widget.videoFile);
-
-      await Share.file(
-          'video', 'esys.mp4', bytes.buffer.asUint8List(), 'video/MP4',
-          text: '');
+      Share.shareFiles([widget.videoFile], text: 'video');
     } catch (e) {
       print('error: $e');
     }
