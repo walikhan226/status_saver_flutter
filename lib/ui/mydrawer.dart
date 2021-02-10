@@ -1,6 +1,3 @@
-import 'package:firebase_admob/firebase_admob.dart';
-import 'package:save_status_/ui/addmanager.dart';
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
@@ -21,23 +18,14 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
     }
   }
 
-  loadRewardedAd() async {
-    await RewardedVideoAd.instance.load(
-      targetingInfo: MobileAdTargetingInfo(),
-      adUnitId: AdManager.rewardedAdUnitId,
-    );
-  }
-
   @override
   void initState() {
-    loadRewardedAd();
     super.initState();
     //RewardedVideoAd.instance.listener = _onRewardedAdEvent;
   }
 
   @override
   void dispose() {
-    RewardedVideoAd.instance.listener = null;
     super.dispose();
   }
 

@@ -12,7 +12,7 @@
     <application
         android:requestLegacyExternalStorage="true"
         android:name="io.flutter.app.FlutterApplication"
-        android:label="save status."
+        android:label="Status Saver"
         android:icon="@mipmap/launcher_icon">
 
 

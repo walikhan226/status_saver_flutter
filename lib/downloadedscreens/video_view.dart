@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
+import 'package:mopub_flutter/mopub.dart';
+import 'package:mopub_flutter/mopub_banner.dart';
+import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
+
 import 'package:save_status_/utils/video_controller.dart';
 
 import 'package:share/share.dart';
@@ -21,117 +22,50 @@ class ViewPlay extends StatefulWidget {
 }
 
 class _ViewPlayState extends State<ViewPlay> {
-  InterstitialAd myInterstitial;
-  InterstitialAd buildInterstitialAd() {
-    return InterstitialAd(
-      adUnitId: AdManager.interstitialAdUnitId,
-      listener: (MobileAdEvent event) {
-        if (event == MobileAdEvent.failedToLoad) {
-          myInterstitial..load();
-        } else if (event == MobileAdEvent.closed) {
-          myInterstitial = buildInterstitialAd()..load();
-        }
-        print(event);
+  MoPubBannerAd moPubBannerAd;
+  MoPubInterstitialAd mInterstitial;
+  @override
+  void dispose() {
+    super.dispose();
+    mInterstitial?.dispose();
+  }
+
+  void _loadInterstitialAd() {
+    mInterstitial = MoPubInterstitialAd(
+      '6b6c2b4fd054432495920692cd535138',
+      (result, args) {
+        print('Interstitial $result');
       },
+      reloadOnClosed: true,
     );
   }
 
-  Future<void> _initAdMob() {
-    // TODO: Initialize AdMob SDK
-    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
-  }
+  loadadd() {
+    try {
+      MoPub.init(AdManager.bannerid, testMode: false);
+    } catch (e) {}
 
-  void showInterstitialAd() {
-    myInterstitial..show();
+    try {
+      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
+        _loadInterstitialAd();
+        mInterstitial.load();
+      });
+    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
-    _initAdMob();
-    myInterstitial = buildInterstitialAd()..load();
-  }
 
-  @override
-  void dispose() {
-    super.dispose();
-    myInterstitial?.dispose();
+    loadadd();
   }
 
   Future<void> sharevideo() async {
     try {
       Share.shareFiles([widget.videoFile], text: 'video');
+      mInterstitial.show();
     } catch (e) {
       print('error: $e');
-    }
-  }
-
-  void _onLoading(bool t, String str) {
-    if (t) {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return SimpleDialog(
-              children: <Widget>[
-                Center(
-                  child: Container(
-                      padding: EdgeInsets.all(10.0),
-                      child: CircularProgressIndicator()),
-                ),
-              ],
-            );
-          });
-    } else {
-      Navigator.of(context).pop();
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SimpleDialog(
-                children: <Widget>[
-                  Center(
-                    child: Container(
-                      padding: EdgeInsets.all(15.0),
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            "Great, Saved in Gallary",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          Text(str,
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              )),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          Text("FileManager > Downloaded Status",
-                              style: TextStyle(
-                                  fontSize: 16.0, color: Color(0xFF096157))),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          MaterialButton(
-                            child: Text("Close"),
-                            color: Color(0xFF096157),
-                            textColor: Colors.white,
-                            onPressed: () => Navigator.of(context).pop(),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          });
     }
   }
 
@@ -150,7 +84,6 @@ class _ViewPlayState extends State<ViewPlay> {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-
         actions: [
           IconButton(
             color: Colors.indigo,
@@ -172,6 +105,8 @@ class _ViewPlayState extends State<ViewPlay> {
               } catch (e) {
                 print(e);
               }
+
+              mInterstitial.show();
             },
           ),
           IconButton(
@@ -185,67 +120,6 @@ class _ViewPlayState extends State<ViewPlay> {
             },
           ),
         ],
-        // title: Container(
-        //   padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 10.0),
-        //   child: FlatButton.icon(
-        //     color: Colors.indigo,
-        //     textColor: Colors.white,
-        //     icon: Icon(Icons.file_download),
-        //     padding: EdgeInsets.all(10.0),
-        //     label: Text(
-        //       'Download',
-        //       style: TextStyle(fontSize: 16.0),
-        //     ), //`Text` to display
-        //     onPressed: () async {
-        //       final folderName = "SaveStatus";
-        //       final path = Directory("storage/emulated/0/$folderName");
-        //       if ((await path.exists())) {
-        //         try {
-        //           showInterstitialAd();
-        //         } catch (e) {}
-
-        //         File file = File(widget.videoFile);
-        //         String curDate = DateTime.now().toString();
-
-        //         File newImage = await file
-        //             .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
-        //             .then((value) {
-        //           Fluttertoast.showToast(
-        //               msg: "Video has been saved to local storage",
-        //               toastLength: Toast.LENGTH_SHORT,
-        //               gravity: ToastGravity.CENTER,
-        //               timeInSecForIosWeb: 1,
-        //               backgroundColor: Colors.white,
-        //               textColor: Colors.black,
-        //               fontSize: 16.0);
-        //         });
-
-        //         print(newImage);
-        //       } else {
-        //         try {
-        //           showInterstitialAd();
-        //         } catch (e) {}
-        //         path.create();
-        //         File file = File(widget.videoFile);
-        //         String curDate = DateTime.now().toString();
-
-        //         File newImage = await file
-        //             .copy('storage/emulated/0/SaveStatus/vid$curDate.MP4')
-        //             .then((value) {
-        //           Fluttertoast.showToast(
-        //               msg: "Video has been saved to local storage",
-        //               toastLength: Toast.LENGTH_SHORT,
-        //               gravity: ToastGravity.CENTER,
-        //               timeInSecForIosWeb: 1,
-        //               backgroundColor: Colors.white,
-        //               textColor: Colors.black,
-        //               fontSize: 16.0);
-        //         });
-        //         print(newImage);
-        //       }
-        //     },
-        //   ),
-        // ),
       ),
       body: Container(
         child: StatusVideo(

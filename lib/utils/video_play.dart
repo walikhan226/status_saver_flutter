@@ -1,10 +1,12 @@
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mopub_flutter/mopub.dart';
+import 'package:mopub_flutter/mopub_banner.dart';
+import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
 import 'package:save_status_/utils/video_controller.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+
 import 'package:video_player/video_player.dart';
 
 class PlayStatus extends StatefulWidget {
@@ -15,110 +17,42 @@ class PlayStatus extends StatefulWidget {
 }
 
 class _PlayStatusState extends State<PlayStatus> {
-  InterstitialAd myInterstitial;
-  InterstitialAd buildInterstitialAd() {
-    return InterstitialAd(
-      adUnitId: AdManager.interstitialAdUnitId,
-      listener: (MobileAdEvent event) {
-        if (event == MobileAdEvent.failedToLoad) {
-          myInterstitial..load();
-        } else if (event == MobileAdEvent.closed) {
-          myInterstitial = buildInterstitialAd()..load();
-        }
-        print(event);
+  MoPubBannerAd moPubBannerAd;
+  MoPubInterstitialAd mInterstitial;
+  @override
+  void dispose() {
+    super.dispose();
+    mInterstitial?.dispose();
+  }
+
+  void _loadInterstitialAd() {
+    mInterstitial = MoPubInterstitialAd(
+      '6b6c2b4fd054432495920692cd535138',
+      (result, args) {
+        print('Interstitial $result');
       },
+      reloadOnClosed: true,
     );
   }
 
-  Future<void> _initAdMob() {
-    // TODO: Initialize AdMob SDK
-    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
-  }
+  loadadd() {
+    try {
+      MoPub.init(AdManager.bannerid, testMode: false);
+    } catch (e) {}
 
-  void showInterstitialAd() {
-    myInterstitial..show();
+    try {
+      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
+        _loadInterstitialAd();
+        mInterstitial.load();
+      });
+    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
-    _initAdMob();
-    myInterstitial = buildInterstitialAd()..load();
-  }
 
-  @override
-  void dispose() {
-    super.dispose();
-    myInterstitial?.dispose();
-  }
-
-  void _onLoading(bool t, String str) {
-    if (t) {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return SimpleDialog(
-              children: <Widget>[
-                Center(
-                  child: Container(
-                      padding: EdgeInsets.all(10.0),
-                      child: CircularProgressIndicator()),
-                ),
-              ],
-            );
-          });
-    } else {
-      Navigator.of(context).pop();
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SimpleDialog(
-                children: <Widget>[
-                  Center(
-                    child: Container(
-                      padding: EdgeInsets.all(15.0),
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            "Great, Saved in Gallary",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          Text(str,
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              )),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          Text("FileManager > Downloaded Status",
-                              style: TextStyle(
-                                  fontSize: 16.0, color: Color(0xFF096157))),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                          ),
-                          MaterialButton(
-                            child: Text("Close"),
-                            color: Color(0xFF096157),
-                            textColor: Colors.white,
-                            onPressed: () => Navigator.of(context).pop(),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          });
-    }
+    loadadd();
   }
 
   @override
@@ -152,7 +86,7 @@ class _PlayStatusState extends State<PlayStatus> {
               final path = Directory("storage/emulated/0/$folderName");
               if ((await path.exists())) {
                 try {
-                  showInterstitialAd();
+                  mInterstitial.show();
                 } catch (e) {}
 
                 File file = File(widget.videoFile);
@@ -172,12 +106,13 @@ class _PlayStatusState extends State<PlayStatus> {
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       fontSize: 16.0);
+                  return;
                 });
 
                 print(newImage);
               } else {
                 try {
-                  showInterstitialAd();
+                  mInterstitial.show();
                 } catch (e) {}
                 path.create();
                 File file = File(widget.videoFile);
@@ -197,6 +132,7 @@ class _PlayStatusState extends State<PlayStatus> {
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       fontSize: 16.0);
+                  return;
                 });
                 print(newImage);
               }

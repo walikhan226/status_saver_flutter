@@ -1,15 +1,15 @@
-import 'dart:async';
-import 'dart:math';
-
-import 'package:firebase_admob/firebase_admob.dart';
+import 'package:mopub_flutter/mopub.dart';
+import 'package:mopub_flutter/mopub_banner.dart';
+import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
+import 'package:save_status_/ui/banneradd.dart';
 import 'package:save_status_/ui/dashboard.dart';
+
 import 'package:save_status_/ui/mydrawer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:share/share.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_html/flutter_html.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -47,18 +47,6 @@ class MyAppState extends State<MyApp> {
 
   Widget home() {
     return Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-        begin: Alignment.bottomLeft,
-        end: Alignment.topRight,
-        colors: [
-          Colors.lightBlue[100],
-          Colors.lightBlue[200],
-          Colors.lightBlue[300],
-          Colors.lightBlue[200],
-          Colors.lightBlue[100],
-        ],
-      )),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,14 +59,14 @@ class MyAppState extends State<MyApp> {
                 style: TextStyle(fontSize: 20.0),
               ),
             ),
-            FlatButton(
+            RaisedButton(
+              elevation: 5,
               padding: EdgeInsets.all(15.0),
               child: Text(
                 "Allow Storage Permission",
                 style: TextStyle(fontSize: 20.0),
               ),
-              color: Colors.indigo,
-              textColor: Colors.white,
+              textColor: Colors.black,
               onPressed: () async {
                 var status = await Permission.storage.status;
 
@@ -130,89 +118,47 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  BannerAd _bannerAd;
-  void _loadBannerAd() {
-    _bannerAd
-      ..load()
-      ..show(anchorType: AnchorType.bottom);
-  }
-
-  Future<void> _initAdMob() {
-    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
-  }
-
+  MoPubBannerAd moPubBannerAd;
+  MoPubInterstitialAd mInterstitial;
   @override
   void dispose() {
-    _bannerAd?.dispose();
-    myInterstitial?.dispose();
     super.dispose();
+    mInterstitial?.dispose();
   }
 
-  InterstitialAd myInterstitial;
+//6b6c2b4fd054432495920692cd535138
 
-  InterstitialAd buildInterstitialAd() {
-    return InterstitialAd(
-      adUnitId: AdManager.interstitialAdUnitId,
-      listener: (MobileAdEvent event) {
-        if (event == MobileAdEvent.failedToLoad) {
-          myInterstitial..load();
-        } else if (event == MobileAdEvent.closed) {
-          myInterstitial = buildInterstitialAd()..load();
-        }
-        print(event);
+  void _loadInterstitialAd() {
+    mInterstitial = MoPubInterstitialAd(
+      '6b6c2b4fd054432495920692cd535138',
+      (result, args) {
+        print('Interstitial $result');
       },
+      reloadOnClosed: true,
     );
   }
 
-  Timer _timer;
-  int _start = 30;
+  loadadd() {
+    try {
+      MoPub.init(AdManager.bannerid, testMode: false);
+    } catch (e) {
+      print(e.toString());
+    }
 
-  void startTimer1() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (Timer timer) {
-        if (_start == 0) {
-          showInterstitialAd();
-          print("timer end");
-          timer.cancel();
-        } else {
-          if (_start != 0) {
-            _start--;
-          }
-        }
-      },
-    );
+    try {
+      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
+        _loadInterstitialAd();
+        mInterstitial.load();
+      });
+    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
-    _initAdMob();
-    _bannerAd = BannerAd(
-      adUnitId: AdManager.bannerAdUnitId,
-      size: AdSize.banner,
-    );
-    //startTimer1();
-    myInterstitial = buildInterstitialAd()..load();
-    _loadBannerAd();
+
+    loadadd();
   }
-
-  void showInterstitialAd() {
-    myInterstitial..show();
-  }
-
-  void showRandomInterstitialAd() {
-    Random r = new Random();
-    bool value = r.nextBool();
-
-    if (value == true) {
-      myInterstitial..show();
-    }
-  }
-
-  var html =
-      "<h3><b>How To Use?</b></h3><p>- Check the Desired Status/Story...</p><p>- Come Back to App, Click on any Image or Video to View...</p><p>- Click the Save Button...<br />The Image/Video is Instantly saved to your Galery :)</p><p>- You can also Use Multiple Saving. [to do]</p>";
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +181,7 @@ class _MyHomeState extends State<MyHome> {
                       subject: '');
 
                   try {
-                    showInterstitialAd();
+                    mInterstitial.show();
                   } catch (e) {}
                 }),
             IconButton(
@@ -253,7 +199,6 @@ class _MyHomeState extends State<MyHome> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Html(data: html),
                                   Expanded(
                                     child: new Align(
                                       alignment: Alignment.bottomRight,
@@ -262,7 +207,15 @@ class _MyHomeState extends State<MyHome> {
                                           'OK!',
                                           style: TextStyle(color: Colors.green),
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
+                                          try {
+                                            mInterstitial.show();
+                                            // await mInterstitial.load();
+                                            //  await mInterstitial.show();
+                                          } catch (e) {
+                                            print(e.toString());
+                                          }
+
                                           Navigator.of(context).pop();
                                         },
                                       ),
@@ -306,7 +259,11 @@ class _MyHomeState extends State<MyHome> {
                 ),
               ]),
         ),
+
+        //724225414947921_730137894356673
         body: Dashboard(),
+
+        bottomSheet: Banneradd(),
         backgroundColor: Colors.white,
         drawer: Drawer(
           child: MyNavigationDrawer(),
