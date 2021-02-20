@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'dart:async';
 
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
+
 import 'package:share/share.dart';
 
 class ViewPhotos extends StatefulWidget {
@@ -19,42 +18,35 @@ class ViewPhotos extends StatefulWidget {
 }
 
 class _ViewPhotosState extends State<ViewPhotos> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  InterstitialAd myInterstitial;
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
+    myInterstitial?.dispose();
   }
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
       },
-      reloadOnClosed: true,
     );
   }
 
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
+  void showInterstitialAd() {
+    myInterstitial..show();
   }
 
   @override
   void initState() {
     super.initState();
-
-    loadadd();
+    myInterstitial = buildInterstitialAd()..load();
   }
 
   final LinearGradient backgroundGradient = new LinearGradient(
@@ -108,9 +100,7 @@ class _ViewPhotosState extends State<ViewPhotos> {
               final folderName = "SaveStatus";
               final path = Directory("storage/emulated/0/$folderName");
               if ((await path.exists())) {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
+                try {} catch (e) {}
                 File file = File(widget.imgPath);
                 String curDate = DateTime.now().toString();
                 curDate = curDate.replaceAll(' ', '');
@@ -130,9 +120,6 @@ class _ViewPhotosState extends State<ViewPhotos> {
                 });
                 print(newImage);
               } else {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
                 path.create();
                 File file = File(widget.imgPath);
                 String curDate = DateTime.now().toString();
@@ -152,6 +139,10 @@ class _ViewPhotosState extends State<ViewPhotos> {
                 });
                 print(newImage);
               }
+
+              try {
+                showInterstitialAd();
+              } catch (e) {}
             },
           ),
           IconButton(
@@ -163,6 +154,10 @@ class _ViewPhotosState extends State<ViewPhotos> {
             onPressed: () {
               try {
                 Share.shareFiles([widget.imgPath], text: 'picture');
+              } catch (e) {}
+
+              try {
+                showInterstitialAd();
               } catch (e) {}
             },
           ),

@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
+
 import 'package:share/share.dart';
 
 class ImageView extends StatefulWidget {
@@ -15,49 +14,41 @@ class ImageView extends StatefulWidget {
 }
 
 class _ImageViewState extends State<ImageView> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  InterstitialAd myInterstitial;
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
+    myInterstitial?.dispose();
   }
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
       },
-      reloadOnClosed: true,
     );
   }
 
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
+  void showInterstitialAd() {
+    myInterstitial..show();
   }
 
   @override
   void initState() {
     super.initState();
-
-    loadadd();
+    myInterstitial = buildInterstitialAd()..load();
   }
 
   Future<void> _shareImage() async {
     print(widget.imgPath);
     try {
       Share.shareFiles([widget.imgPath], text: 'picture');
-      mInterstitial.show();
     } catch (e) {
       print('error: $e');
     }
@@ -99,8 +90,6 @@ class _ImageViewState extends State<ImageView> {
               color: Colors.white,
             ),
             onPressed: () async {
-              mInterstitial.show();
-
               try {
                 var file = File(widget.imgPath);
 
@@ -114,6 +103,9 @@ class _ImageViewState extends State<ImageView> {
               } catch (e) {
                 print(e);
               }
+              try {
+                showInterstitialAd();
+              } catch (e) {}
             },
           ),
           IconButton(
@@ -124,6 +116,9 @@ class _ImageViewState extends State<ImageView> {
             ),
             onPressed: () async {
               _shareImage();
+              try {
+                showInterstitialAd();
+              } catch (e) {}
             },
           ),
         ],

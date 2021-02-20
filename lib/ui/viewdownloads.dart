@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
-import 'package:save_status_/downloadedscreens/image_view.dart';
+
 import 'package:save_status_/ui/imageScreen.dart';
 
 import 'package:save_status_/ui/videoScreen.dart';

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_file_manager/flutter_file_manager.dart';
+
 import 'dart:io' as io;
-import 'package:path/path.dart' as p;
-import 'package:thumbnails/thumbnails.dart';
 
 class SaveScreen extends StatefulWidget {
   @override

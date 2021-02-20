@@ -1,8 +1,6 @@
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:save_status_/ui/addmanager.dart';
-import 'package:save_status_/ui/banneradd.dart';
 import 'package:save_status_/ui/dashboard.dart';
 
 import 'package:save_status_/ui/mydrawer.dart';
@@ -118,48 +116,61 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  BannerAd _bannerAd;
+  void _loadBannerAd() {
+    try {
+      _bannerAd
+        ..load()
+        ..show(anchorType: AnchorType.bottom);
+    } catch (e) {}
+  }
+
+  Future<void> _initAdMob() {
+    return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+  }
+
   @override
   void dispose() {
+    _bannerAd?.dispose();
+    myInterstitial?.dispose();
     super.dispose();
-    mInterstitial?.dispose();
   }
 
-//6b6c2b4fd054432495920692cd535138
+  InterstitialAd myInterstitial;
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
       },
-      reloadOnClosed: true,
     );
-  }
-
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {
-      print(e.toString());
-    }
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
-
-    loadadd();
+    _initAdMob();
+    _bannerAd = BannerAd(
+      adUnitId: AdManager.bannerAdUnitId,
+      size: AdSize.banner,
+    );
+    //startTimer1();
+    myInterstitial = buildInterstitialAd()..load();
+    _loadBannerAd();
   }
 
+  void showInterstitialAd() {
+    myInterstitial..show();
+  }
+
+  var html =
+      "<h3><b>How To Use?</b></h3><p>- Check the Desired Status/Story...</p><p>- Come Back to App, Click on any Image or Video to View...</p><p>- Click the Save Button...<br />The Image/Video is Instantly saved to your Galery :)</p><p>- You can also Use Multiple Saving.</p>";
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -180,9 +191,7 @@ class _MyHomeState extends State<MyHome> {
                       'https://play.google.com/store/apps/details?id=com.remerse.savestatus',
                       subject: '');
 
-                  try {
-                    mInterstitial.show();
-                  } catch (e) {}
+                  try {} catch (e) {}
                 }),
             IconButton(
                 icon: Icon(Icons.help_outline),
@@ -199,6 +208,7 @@ class _MyHomeState extends State<MyHome> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Html(data: html),
                                   Expanded(
                                     child: new Align(
                                       alignment: Alignment.bottomRight,
@@ -207,14 +217,10 @@ class _MyHomeState extends State<MyHome> {
                                           'OK!',
                                           style: TextStyle(color: Colors.green),
                                         ),
-                                        onPressed: () async {
+                                        onPressed: () {
                                           try {
-                                            mInterstitial.show();
-                                            // await mInterstitial.load();
-                                            //  await mInterstitial.show();
-                                          } catch (e) {
-                                            print(e.toString());
-                                          }
+                                            showInterstitialAd();
+                                          } catch (e) {}
 
                                           Navigator.of(context).pop();
                                         },
@@ -254,7 +260,7 @@ class _MyHomeState extends State<MyHome> {
                   child: Text(
                     'DOWNLOADED',
                     style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.035),
+                        fontSize: MediaQuery.of(context).size.width * 0.032),
                   ),
                 ),
               ]),
@@ -263,7 +269,7 @@ class _MyHomeState extends State<MyHome> {
         //724225414947921_730137894356673
         body: Dashboard(),
 
-        bottomSheet: Banneradd(),
+        //    bottomSheet: Banneradd(),
         backgroundColor: Colors.white,
         drawer: Drawer(
           child: MyNavigationDrawer(),

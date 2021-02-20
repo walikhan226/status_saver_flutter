@@ -1,10 +1,8 @@
 import 'dart:io';
 
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
 import 'package:save_status_/ui/addmanager.dart';
 
 import 'package:save_status_/utils/video_controller.dart';
@@ -22,48 +20,40 @@ class ViewPlay extends StatefulWidget {
 }
 
 class _ViewPlayState extends State<ViewPlay> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  InterstitialAd myInterstitial;
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
+    myInterstitial?.dispose();
   }
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
+  InterstitialAd buildInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdManager.interstitialAdUnitId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
       },
-      reloadOnClosed: true,
     );
   }
 
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
+  void showInterstitialAd() {
+    myInterstitial..show();
   }
 
   @override
   void initState() {
     super.initState();
-
-    loadadd();
+    myInterstitial = buildInterstitialAd()..load();
   }
 
   Future<void> sharevideo() async {
     try {
       Share.shareFiles([widget.videoFile], text: 'video');
-      mInterstitial.show();
     } catch (e) {
       print('error: $e');
     }
@@ -106,7 +96,11 @@ class _ViewPlayState extends State<ViewPlay> {
                 print(e);
               }
 
-              mInterstitial.show();
+              try {
+                showInterstitialAd();
+              } catch (e) {
+                print(e.toString());
+              }
             },
           ),
           IconButton(
@@ -117,6 +111,10 @@ class _ViewPlayState extends State<ViewPlay> {
             ),
             onPressed: () {
               sharevideo();
+
+              try {
+                showInterstitialAd();
+              } catch (e) {}
             },
           ),
         ],

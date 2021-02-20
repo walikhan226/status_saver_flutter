@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:thumbnails/thumbnails.dart';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 class VideoScreen extends StatefulWidget {
   final String path;
@@ -54,20 +53,6 @@ class VideoGrid extends StatefulWidget {
 }
 
 class _VideoGridState extends State<VideoGrid> {
-  Future<String> _getImage(String videoPathUrl) async {
-    try {
-      await Future.delayed(Duration(milliseconds: 500));
-
-      return await Thumbnails.getThumbnail(
-          videoFile: videoPathUrl,
-          imageType:
-              ThumbFormat.PNG, //this image will store in created folderpath
-          quality: 30);
-    } catch (e) {
-      throw (e);
-    }
-  }
-
   Future<String> getImage(videoPathUrl) async {
     print(videoPathUrl);
     var appDocDir = await getApplicationDocumentsDirectory();
