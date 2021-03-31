@@ -1,7 +1,5 @@
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
-import 'package:save_status_/ui/addmanager.dart';
+import 'package:facebook_audience_network/ad/ad_interstitial.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:save_status_/ui/banneradd.dart';
 import 'package:save_status_/ui/dashboard.dart';
 
@@ -118,47 +116,56 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  bool _isInterstitialAdLoaded = false;
+  void _loadInterstitialAd() {
+    FacebookInterstitialAd.loadInterstitialAd(
+      placementId:
+          "724225414947921_724310951606034", //"IMG_16_9_APP_INSTALL#2312433698835503_2650502525028617" YOUR_PLACEMENT_ID
+      listener: (result, value) {
+        print(">> FAN > Interstitial Ad: $result --> $value");
+        if (result == InterstitialAdResult.LOADED) {
+          _isInterstitialAdLoaded = true;
+        }
+
+        /// Once an Interstitial Ad has been dismissed and becomes invalidated,
+        /// load a fresh Ad by calling this function.
+        if (result == InterstitialAdResult.DISMISSED &&
+            value["invalidated"] == true) {
+          _isInterstitialAdLoaded = false;
+          _loadInterstitialAd();
+        }
+      },
+    ).then((b) {
+      _showInterstitialAd();
+      return;
+    });
+  }
+
+  _showInterstitialAd() {
+    if (_isInterstitialAdLoaded == true)
+      FacebookInterstitialAd.showInterstitialAd();
+    else {
+      FacebookInterstitialAd.loadInterstitialAd(
+          placementId: "724225414947921_724310951606034");
+    }
+    print("Interstial Ad not yet loaded!");
+  }
+
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
   }
 
 //6b6c2b4fd054432495920692cd535138
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
-      },
-      reloadOnClosed: true,
-    );
-  }
-
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {
-      print(e.toString());
-    }
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
-  }
-
   @override
   void initState() {
+    _loadInterstitialAd();
     super.initState();
-
-    loadadd();
   }
+
+  var html =
+      "<h3><b>How To Use?</b></h3><p>- Check the Desired Status/Story...</p><p>- Come Back to App, Click on any Image or Video to View...</p><p>- Click the Save Button...<br />The Image/Video is Instantly saved to your Galery :)</p><p>- You can also Use Multiple Saving.</p>";
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +188,7 @@ class _MyHomeState extends State<MyHome> {
                       subject: '');
 
                   try {
-                    mInterstitial.show();
+                    _showInterstitialAd();
                   } catch (e) {}
                 }),
             IconButton(
@@ -199,6 +206,7 @@ class _MyHomeState extends State<MyHome> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Html(data: html),
                                   Expanded(
                                     child: new Align(
                                       alignment: Alignment.bottomRight,
@@ -209,9 +217,7 @@ class _MyHomeState extends State<MyHome> {
                                         ),
                                         onPressed: () async {
                                           try {
-                                            mInterstitial.show();
-                                            // await mInterstitial.load();
-                                            //  await mInterstitial.show();
+                                            _showInterstitialAd();
                                           } catch (e) {
                                             print(e.toString());
                                           }
@@ -254,7 +260,7 @@ class _MyHomeState extends State<MyHome> {
                   child: Text(
                     'DOWNLOADED',
                     style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width * 0.035),
+                        fontSize: MediaQuery.of(context).size.width * 0.032),
                   ),
                 ),
               ]),

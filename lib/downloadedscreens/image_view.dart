@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:facebook_audience_network/ad/ad_interstitial.dart';
 import 'package:flutter/material.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
-import 'package:save_status_/ui/addmanager.dart';
+import 'package:save_status_/ui/banneradd.dart';
+
 import 'package:share/share.dart';
 
 class ImageView extends StatefulWidget {
@@ -15,49 +14,58 @@ class ImageView extends StatefulWidget {
 }
 
 class _ImageViewState extends State<ImageView> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  bool _isInterstitialAdLoaded = false;
+  void _loadInterstitialAd() {
+    FacebookInterstitialAd.loadInterstitialAd(
+      placementId:
+          "724225414947921_724310951606034", //"IMG_16_9_APP_INSTALL#2312433698835503_2650502525028617" YOUR_PLACEMENT_ID
+      listener: (result, value) {
+        print(">> FAN > Interstitial Ad: $result --> $value");
+        if (result == InterstitialAdResult.LOADED) {
+          _isInterstitialAdLoaded = true;
+        }
+
+        /// Once an Interstitial Ad has been dismissed and becomes invalidated,
+        /// load a fresh Ad by calling this function.
+        if (result == InterstitialAdResult.DISMISSED &&
+            value["invalidated"] == true) {
+          _isInterstitialAdLoaded = false;
+          _loadInterstitialAd();
+        }
+      },
+    ).then((b) {
+      _showInterstitialAd();
+      return;
+    });
+  }
+
+  _showInterstitialAd() {
+    if (_isInterstitialAdLoaded == true)
+      FacebookInterstitialAd.showInterstitialAd();
+    else {
+      FacebookInterstitialAd.loadInterstitialAd(
+          placementId: "724225414947921_724310951606034");
+    }
+    print("Interstial Ad not yet loaded!");
+  }
+
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
   }
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
-      },
-      reloadOnClosed: true,
-    );
-  }
-
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
-  }
+//6b6c2b4fd054432495920692cd535138
 
   @override
   void initState() {
+    _loadInterstitialAd();
     super.initState();
-
-    loadadd();
   }
 
   Future<void> _shareImage() async {
     print(widget.imgPath);
     try {
       Share.shareFiles([widget.imgPath], text: 'picture');
-      mInterstitial.show();
     } catch (e) {
       print('error: $e');
     }
@@ -99,8 +107,6 @@ class _ImageViewState extends State<ImageView> {
               color: Colors.white,
             ),
             onPressed: () async {
-              mInterstitial.show();
-
               try {
                 var file = File(widget.imgPath);
 
@@ -114,6 +120,10 @@ class _ImageViewState extends State<ImageView> {
               } catch (e) {
                 print(e);
               }
+
+              try {
+                _showInterstitialAd();
+              } catch (e) {}
             },
           ),
           IconButton(
@@ -123,6 +133,10 @@ class _ImageViewState extends State<ImageView> {
               color: Colors.white,
             ),
             onPressed: () async {
+              try {
+                _showInterstitialAd();
+              } catch (e) {}
+
               _shareImage();
             },
           ),
@@ -154,6 +168,7 @@ class _ImageViewState extends State<ImageView> {
           ],
         ),
       ),
+      bottomSheet: Banneradd(),
     );
   }
 }

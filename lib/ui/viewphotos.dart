@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'dart:async';
 
+import 'package:facebook_audience_network/ad/ad_interstitial.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
+
 import 'package:save_status_/ui/addmanager.dart';
 import 'package:share/share.dart';
 
@@ -19,42 +18,52 @@ class ViewPhotos extends StatefulWidget {
 }
 
 class _ViewPhotosState extends State<ViewPhotos> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
+  bool _isInterstitialAdLoaded = false;
+  void _loadInterstitialAd() {
+    FacebookInterstitialAd.loadInterstitialAd(
+      placementId:
+          "724225414947921_724310951606034", //"IMG_16_9_APP_INSTALL#2312433698835503_2650502525028617" YOUR_PLACEMENT_ID
+      listener: (result, value) {
+        print(">> FAN > Interstitial Ad: $result --> $value");
+        if (result == InterstitialAdResult.LOADED) {
+          _isInterstitialAdLoaded = true;
+        }
+
+        /// Once an Interstitial Ad has been dismissed and becomes invalidated,
+        /// load a fresh Ad by calling this function.
+        if (result == InterstitialAdResult.DISMISSED &&
+            value["invalidated"] == true) {
+          _isInterstitialAdLoaded = false;
+          _loadInterstitialAd();
+        }
+      },
+    ).then((b) {
+      _showInterstitialAd();
+      return;
+    });
+  }
+
+  _showInterstitialAd() {
+    if (_isInterstitialAdLoaded == true)
+      FacebookInterstitialAd.showInterstitialAd();
+    else {
+      FacebookInterstitialAd.loadInterstitialAd(
+          placementId: "724225414947921_724310951606034");
+    }
+    print("Interstial Ad not yet loaded!");
+  }
+
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
   }
 
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
-      },
-      reloadOnClosed: true,
-    );
-  }
-
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
-  }
+//6b6c2b4fd054432495920692cd535138
 
   @override
   void initState() {
+    _loadInterstitialAd();
     super.initState();
-
-    loadadd();
   }
 
   final LinearGradient backgroundGradient = new LinearGradient(
@@ -108,9 +117,7 @@ class _ViewPhotosState extends State<ViewPhotos> {
               final folderName = "SaveStatus";
               final path = Directory("storage/emulated/0/$folderName");
               if ((await path.exists())) {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
+                try {} catch (e) {}
                 File file = File(widget.imgPath);
                 String curDate = DateTime.now().toString();
                 curDate = curDate.replaceAll(' ', '');
@@ -130,9 +137,6 @@ class _ViewPhotosState extends State<ViewPhotos> {
                 });
                 print(newImage);
               } else {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
                 path.create();
                 File file = File(widget.imgPath);
                 String curDate = DateTime.now().toString();
@@ -152,6 +156,9 @@ class _ViewPhotosState extends State<ViewPhotos> {
                 });
                 print(newImage);
               }
+              try {
+                _loadInterstitialAd();
+              } catch (e) {}
             },
           ),
           IconButton(
@@ -163,6 +170,10 @@ class _ViewPhotosState extends State<ViewPhotos> {
             onPressed: () {
               try {
                 Share.shareFiles([widget.imgPath], text: 'picture');
+              } catch (e) {}
+
+              try {
+                _loadInterstitialAd();
               } catch (e) {}
             },
           ),

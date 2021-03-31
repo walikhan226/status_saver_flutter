@@ -1,8 +1,5 @@
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mopub_flutter/mopub.dart';
-import 'package:mopub_flutter/mopub_banner.dart';
-import 'package:mopub_flutter/mopub_interstitial.dart';
-import 'package:save_status_/ui/addmanager.dart';
+
 import 'package:save_status_/utils/video_controller.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
@@ -17,42 +14,14 @@ class PlayStatus extends StatefulWidget {
 }
 
 class _PlayStatusState extends State<PlayStatus> {
-  MoPubBannerAd moPubBannerAd;
-  MoPubInterstitialAd mInterstitial;
   @override
   void dispose() {
     super.dispose();
-    mInterstitial?.dispose();
-  }
-
-  void _loadInterstitialAd() {
-    mInterstitial = MoPubInterstitialAd(
-      '6b6c2b4fd054432495920692cd535138',
-      (result, args) {
-        print('Interstitial $result');
-      },
-      reloadOnClosed: true,
-    );
-  }
-
-  loadadd() {
-    try {
-      MoPub.init(AdManager.bannerid, testMode: false);
-    } catch (e) {}
-
-    try {
-      MoPub.init(AdManager.interstialid, testMode: false).then((_) {
-        _loadInterstitialAd();
-        mInterstitial.load();
-      });
-    } catch (e) {}
   }
 
   @override
   void initState() {
     super.initState();
-
-    loadadd();
   }
 
   @override
@@ -85,9 +54,7 @@ class _PlayStatusState extends State<PlayStatus> {
               final folderName = "SaveStatus";
               final path = Directory("storage/emulated/0/$folderName");
               if ((await path.exists())) {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
+                try {} catch (e) {}
 
                 File file = File(widget.videoFile);
                 String curDate = DateTime.now().toString();
@@ -111,9 +78,7 @@ class _PlayStatusState extends State<PlayStatus> {
 
                 print(newImage);
               } else {
-                try {
-                  mInterstitial.show();
-                } catch (e) {}
+                try {} catch (e) {}
                 path.create();
                 File file = File(widget.videoFile);
                 String curDate = DateTime.now().toString();

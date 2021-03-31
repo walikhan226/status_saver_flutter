@@ -1,3 +1,4 @@
+import 'package:facebook_audience_network/ad/ad_interstitial.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
@@ -8,8 +9,6 @@ class MyNavigationDrawer extends StatefulWidget {
 }
 
 class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
-  final String version = '0.3+2';
-
   _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -18,15 +17,52 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    //RewardedVideoAd.instance.listener = _onRewardedAdEvent;
+  bool _isInterstitialAdLoaded = false;
+  void _loadInterstitialAd() {
+    FacebookInterstitialAd.loadInterstitialAd(
+      placementId:
+          "724225414947921_724310951606034", //"IMG_16_9_APP_INSTALL#2312433698835503_2650502525028617" YOUR_PLACEMENT_ID
+      listener: (result, value) {
+        print(">> FAN > Interstitial Ad: $result --> $value");
+        if (result == InterstitialAdResult.LOADED) {
+          _isInterstitialAdLoaded = true;
+        }
+
+        /// Once an Interstitial Ad has been dismissed and becomes invalidated,
+        /// load a fresh Ad by calling this function.
+        if (result == InterstitialAdResult.DISMISSED &&
+            value["invalidated"] == true) {
+          _isInterstitialAdLoaded = false;
+          _loadInterstitialAd();
+        }
+      },
+    ).then((b) {
+      _showInterstitialAd();
+      return;
+    });
+  }
+
+  _showInterstitialAd() {
+    if (_isInterstitialAdLoaded == true)
+      FacebookInterstitialAd.showInterstitialAd();
+    else {
+      FacebookInterstitialAd.loadInterstitialAd(
+          placementId: "724225414947921_724310951606034");
+    }
+    print("Interstial Ad not yet loaded!");
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+//6b6c2b4fd054432495920692cd535138
+
+  @override
+  void initState() {
+    _loadInterstitialAd();
+    super.initState();
   }
 
   @override
