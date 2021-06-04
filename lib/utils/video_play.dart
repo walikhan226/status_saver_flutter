@@ -2,6 +2,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:save_status_/utils/video_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:share/share.dart';
 import 'dart:io';
 
 import 'package:video_player/video_player.dart';
@@ -104,6 +105,19 @@ class _PlayStatusState extends State<PlayStatus> {
             },
           ),
         ),
+        actions: [
+          IconButton(
+              color: Colors.indigo,
+              icon: Icon(
+                Icons.share,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                try {
+                  Share.shareFiles([widget.videoFile], text: 'video');
+                } catch (e) {}
+              }),
+        ],
       ),
       body: Container(
         child: StatusVideo(

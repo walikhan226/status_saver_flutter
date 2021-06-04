@@ -53,6 +53,7 @@ class VideoGrid extends StatefulWidget {
 }
 
 class _VideoGridState extends State<VideoGrid> {
+  List<Widget> thumpnail = [];
   Future<String> getImage(videoPathUrl) async {
     print(videoPathUrl);
     var appDocDir = await getApplicationDocumentsDirectory();
@@ -60,166 +61,145 @@ class _VideoGridState extends State<VideoGrid> {
     String thumb = await Thumbnails.getThumbnail(
         thumbnailFolder: folderPath,
         videoFile: videoPathUrl,
-        imageType:
-            ThumbFormat.PNG, //this image will store in created folderpath
+        imageType: ThumbFormat.PNG,
         quality: 30);
-    print(" Thump is " + thumb);
+
     return thumb;
+  }
+
+  var ischecked = false;
+  getdata() async {
+    thumpnail = [];
+    for (int i = 0; i < videoList.length; i++) {
+      var appDocDir = await getApplicationDocumentsDirectory();
+      final folderPath = appDocDir.path;
+      String thumb = await Thumbnails.getThumbnail(
+          thumbnailFolder: folderPath,
+          videoFile: videoList[i],
+          imageType: ThumbFormat.PNG,
+          quality: 30);
+
+      thumpnail.add(Image.file(File(thumb)));
+    }
+    ischecked = true;
+    setState(() {});
+  }
+
+  var videoList;
+  @override
+  void initState() {
+    super.initState();
+    videoList = widget.directory
+        .listSync()
+        .map((item) => item.path)
+        .where((item) => item.endsWith(".MP4") || item.endsWith(".mp4"))
+        .toList();
+
+    for (int i = 0; i < videoList.length; i++) {
+      thumpnail.add(Image.asset("assets/images/video_loader.gif"));
+    }
+
+    setState(() {});
+    getdata();
   }
 
   @override
   Widget build(BuildContext context) {
-    var videoList = widget.directory
-        .listSync()
-        .map((item) => item.path)
-        .where((item) => item.endsWith(".MP4") || item.endsWith(".mp4"))
-        .toList(growable: false);
+    return Container(
+      padding: EdgeInsets.only(bottom: 60.0),
+      child: GridView.builder(
+        itemCount: videoList.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 1, childAspectRatio: 8.0 / 8.0),
+        itemBuilder: (context, index) {
+          return Container(
+            padding: EdgeInsets.all(10.0),
+            child: InkWell(
+              onTap: () async {
+                if (widget.state == 'main') {
+                  Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                        builder: (context) => new PlayStatus(
+                              videoFile: videoList[index],
+                            )),
+                  );
+                }
 
-    if (videoList != null) {
-      if (videoList.length > 0) {
-        return Container(
-          padding: EdgeInsets.only(bottom: 60.0),
-          child: GridView.builder(
-            itemCount: videoList.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, childAspectRatio: 8.0 / 8.0),
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(10.0),
-                child: InkWell(
-                  onTap: () async {
-                    if (widget.state == 'main') {
-                      Navigator.push(
-                        context,
-                        new MaterialPageRoute(
-                            builder: (context) => new PlayStatus(
-                                  videoFile: videoList[index],
-                                )),
-                      );
-                    }
-
-                    if (widget.state == 'download') {
-                      var val = await Navigator.push(
-                        context,
-                        new MaterialPageRoute(
-                            builder: (context) => new ViewPlay(
-                                  videoFile: videoList[index],
-                                )),
-                      ).then((value) {
-                        setState(() {});
-                      });
-                    }
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        // Where the linear gradient begins and ends
-                        begin: Alignment.bottomLeft,
-                        end: Alignment.topRight,
-                        // Add one stop for each color. Stops should increase from 0 to 1
-                        stops: [0.1, 0.3, 0.5, 0.7, 0.9],
-                        colors: [
-                          // Colors are easy thanks to Flutter's Colors class.
-                          Color(0xffb7d8cf),
-                          Color(0xffb7d8cf),
-                          Color(0xffb7d8cf),
-                          Color(0xffb7d8cf),
-                          Color(0xffb7d8cf),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                if (widget.state == 'download') {
+                  var val = await Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                        builder: (context) => new ViewPlay(
+                              videoFile: videoList[index],
+                            )),
+                  ).then((value) {
+                    setState(() {});
+                  });
+                }
+              },
+              child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      stops: [0.1, 0.3, 0.5, 0.7, 0.9],
+                      colors: [
+                        Color(0xffb7d8cf),
+                        Color(0xffb7d8cf),
+                        Color(0xffb7d8cf),
+                        Color(0xffb7d8cf),
+                        Color(0xffb7d8cf),
+                      ],
                     ),
-                    child: FutureBuilder(
-                        future: getImage(videoList[index]),
-                        builder: (context, AsyncSnapshot<String> snapshot) {
-                          if (snapshot.hasError) {
-                            print("This error " + snapshot.error);
-                          }
-
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            if (snapshot.hasData) {
-                              return Column(children: <Widget>[
-                                Hero(
-                                  tag: videoList[index],
-                                  child: Image.file(
-                                    File(snapshot.data),
-                                    height: 280.0,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10.0, right: 10.0),
-                                  child: RaisedButton(
-                                    child: Text("Play Video"),
-                                    color: Color(0xFF096157),
-                                    textColor: Colors.white,
-                                    onPressed: () async {
-                                      if (widget.state == 'main') {
-                                        Navigator.push(
-                                          context,
-                                          new MaterialPageRoute(
-                                              builder: (context) =>
-                                                  new PlayStatus(
-                                                    videoFile: videoList[index],
-                                                  )),
-                                        );
-                                      }
-
-                                      if (widget.state == 'download') {
-                                        var val = await Navigator.push(
-                                          context,
-                                          new MaterialPageRoute(
-                                              builder: (context) =>
-                                                  new ViewPlay(
-                                                    videoFile: videoList[index],
-                                                  )),
-                                        ).then((value) {
-                                          setState(() {});
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ]);
-                            } else {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                          } else {
-                            return Hero(
-                              tag: videoList[index],
-                              child: Container(
-                                height: 280.0,
-                                child: Image.asset(
-                                    "assets/images/video_loader.gif"),
-                              ),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Column(children: <Widget>[
+                    Hero(
+                      tag: videoList[index],
+                      child: Container(
+                        height: 280.0,
+                        child: ischecked
+                            ? thumpnail[index]
+                            : Image.asset("assets/images/video_loader.gif"),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                      child: RaisedButton(
+                        child: Text("Play Video"),
+                        color: Color(0xFF096157),
+                        textColor: Colors.white,
+                        onPressed: () async {
+                          if (widget.state == 'main') {
+                            Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => new PlayStatus(
+                                        videoFile: videoList[index],
+                                      )),
                             );
                           }
-                        }),
-                    //new cod
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      } else {
-        return Center(
-          child: Container(
-            padding: EdgeInsets.only(bottom: 60.0),
-            child: Text(
-              "Sorry, No Videos Found.",
-              style: TextStyle(fontSize: 18.0),
+
+                          if (widget.state == 'download') {
+                            var val = await Navigator.push(
+                              context,
+                              new MaterialPageRoute(
+                                  builder: (context) => new ViewPlay(
+                                        videoFile: videoList[index],
+                                      )),
+                            ).then((value) {
+                              setState(() {});
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ])),
             ),
-          ),
-        );
-      }
-    } else {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+          );
+        },
+      ),
+    );
   }
 }
