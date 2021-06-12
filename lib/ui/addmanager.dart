@@ -23,9 +23,9 @@ class AdManager {
 
   static String get appId {
     if (Platform.isAndroid) {
-      return "ca-app-pub-6637457000724205~7863779043";
+      return "ca-app-pub-3940256099942544~3347511713";
     } else if (Platform.isIOS) {
-      return "ca-app-pub-6637457000724205~7863779043";
+      return "ca-app-pub-3940256099942544~3347511713";
     } else {
       throw new UnsupportedError("Unsupported platform");
     }
@@ -33,9 +33,9 @@ class AdManager {
 
   static String get bannerAdUnitId {
     if (Platform.isAndroid) {
-      return "ca-app-pub-6637457000724205/9954102137";
+      return "	ca-app-pub-3940256099942544/6300978111";
     } else if (Platform.isIOS) {
-      return "ca-app-pub-6637457000724205/9954102137";
+      return "	ca-app-pub-3940256099942544/6300978111";
     } else {
       throw new UnsupportedError("Unsupported platform");
     }
@@ -43,9 +43,9 @@ class AdManager {
 
   static String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      return "ca-app-pub-6637457000724205/5575873427";
+      return "ca-app-pub-3940256099942544/1033173712";
     } else if (Platform.isIOS) {
-      return "ca-app-pub-6637457000724205/5575873427";
+      return "ca-app-pub-3940256099942544/1033173712";
     } else {
       throw new UnsupportedError("Unsupported platform");
     }
@@ -53,9 +53,9 @@ class AdManager {
 
   static String get rewardedAdUnitId {
     if (Platform.isAndroid) {
-      return "ca-app-pub-6637457000724205/1636628419";
+      return "ca-app-pub-3940256099942544/5224354917";
     } else if (Platform.isIOS) {
-      return "ca-app-pub-6637457000724205/1636628419";
+      return "ca-app-pub-3940256099942544/5224354917";
     } else {
       throw new UnsupportedError("Unsupported platform");
     }

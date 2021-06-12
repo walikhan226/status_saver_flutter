@@ -126,6 +126,17 @@ class _MyNavigationDrawerState extends State<MyNavigationDrawer> {
             },
           ),
         ),
+
+        // Card(
+        //   child: ListTile(
+        //     leading: IconTheme(
+        //         data: new IconThemeData(color: Color(0xff757575)),
+        //         child: Icon(Icons.rate_review_outlined)),
+        //     title: Text('Rate us'),
+        //     onTap: () {},
+        //   ),
+        // ),
+
         // Card(
         //   child: ListTile(
         //     leading: IconTheme(

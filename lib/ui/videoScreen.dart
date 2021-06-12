@@ -1,3 +1,4 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:save_status_/downloadedscreens/video_view.dart';
 import 'package:save_status_/utils/video_play.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,8 @@ class VideoScreen extends StatefulWidget {
   VideoScreenState createState() => new VideoScreenState();
 }
 
-class VideoScreenState extends State<VideoScreen> {
+class VideoScreenState extends State<VideoScreen>
+    with AutomaticKeepAliveClientMixin<VideoScreen> {
   Directory _videoDir;
   @override
   void initState() {
@@ -41,6 +43,10 @@ class VideoScreenState extends State<VideoScreen> {
       );
     }
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class VideoGrid extends StatefulWidget {
@@ -105,100 +111,144 @@ class _VideoGridState extends State<VideoGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(bottom: 60.0),
-      child: GridView.builder(
-        itemCount: videoList.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1, childAspectRatio: 8.0 / 8.0),
-        itemBuilder: (context, index) {
-          return Container(
-            padding: EdgeInsets.all(10.0),
-            child: InkWell(
-              onTap: () async {
-                if (widget.state == 'main') {
-                  Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                        builder: (context) => new PlayStatus(
-                              videoFile: videoList[index],
-                            )),
-                  );
-                }
+    return RefreshIndicator(
+      onRefresh: () async {
+        thumpnail = [];
+        videoList = widget.directory
+            .listSync()
+            .map((item) => item.path)
+            .where((item) => item.endsWith(".MP4") || item.endsWith(".mp4"))
+            .toList();
 
-                if (widget.state == 'download') {
-                  var val = await Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                        builder: (context) => new ViewPlay(
-                              videoFile: videoList[index],
-                            )),
-                  ).then((value) {
-                    setState(() {});
-                  });
-                }
-              },
-              child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight,
-                      stops: [0.1, 0.3, 0.5, 0.7, 0.9],
-                      colors: [
-                        Color(0xffb7d8cf),
-                        Color(0xffb7d8cf),
-                        Color(0xffb7d8cf),
-                        Color(0xffb7d8cf),
-                        Color(0xffb7d8cf),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: Column(children: <Widget>[
-                    Hero(
-                      tag: videoList[index],
-                      child: Container(
-                        height: 280.0,
-                        child: ischecked
-                            ? thumpnail[index]
-                            : Image.asset("assets/images/video_loader.gif"),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 10.0, right: 10.0),
-                      child: RaisedButton(
-                        child: Text("Play Video"),
-                        color: Color(0xFF096157),
-                        textColor: Colors.white,
-                        onPressed: () async {
-                          if (widget.state == 'main') {
-                            Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => new PlayStatus(
-                                        videoFile: videoList[index],
-                                      )),
-                            );
-                          }
+        for (int i = 0; i < videoList.length; i++) {
+          thumpnail.add(Image.asset("assets/images/video_loader.gif"));
+        }
 
-                          if (widget.state == 'download') {
-                            var val = await Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => new ViewPlay(
-                                        videoFile: videoList[index],
-                                      )),
-                            ).then((value) {
-                              setState(() {});
-                            });
-                          }
-                        },
+        await getdata();
+
+        return;
+      },
+      child: Container(
+        padding: EdgeInsets.only(bottom: 60.0),
+        child: GridView.builder(
+          itemCount: videoList.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1, childAspectRatio: 8.0 / 8.0),
+          itemBuilder: (context, index) {
+            return Container(
+              padding: EdgeInsets.all(10.0),
+              child: InkWell(
+                onTap: () async {
+                  if (widget.state == 'main') {
+                    Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) => new PlayStatus(
+                                videoFile: videoList[index],
+                              )),
+                    );
+                  }
+
+                  if (widget.state == 'download') {
+                    var val = await Navigator.push(
+                      context,
+                      new MaterialPageRoute(
+                          builder: (context) => new ViewPlay(
+                                videoFile: videoList[index],
+                              )),
+                    );
+
+                    thumpnail = [];
+                    videoList = widget.directory
+                        .listSync()
+                        .map((item) => item.path)
+                        .where((item) =>
+                            item.endsWith(".MP4") || item.endsWith(".mp4"))
+                        .toList();
+
+                    for (int i = 0; i < videoList.length; i++) {
+                      thumpnail
+                          .add(Image.asset("assets/images/video_loader.gif"));
+                    }
+
+                    await getdata();
+                  }
+                },
+                child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomLeft,
+                        end: Alignment.topRight,
+                        stops: [0.1, 0.3, 0.5, 0.7, 0.9],
+                        colors: [
+                          Color(0xffb7d8cf),
+                          Color(0xffb7d8cf),
+                          Color(0xffb7d8cf),
+                          Color(0xffb7d8cf),
+                          Color(0xffb7d8cf),
+                        ],
                       ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
-                  ])),
-            ),
-          );
-        },
+                    child: Column(children: <Widget>[
+                      Hero(
+                        tag: videoList[index],
+                        child: Container(
+                          height: 280.0,
+                          child: ischecked
+                              ? thumpnail[index]
+                              : Image.asset("assets/images/video_loader.gif"),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                        child: RaisedButton(
+                          child: Text("Play Video"),
+                          color: Color(0xFF096157),
+                          textColor: Colors.white,
+                          onPressed: () async {
+                            if (widget.state == 'main') {
+                              Navigator.push(
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => new PlayStatus(
+                                          videoFile: videoList[index],
+                                        )),
+                              );
+                            }
+
+                            if (widget.state == 'download') {
+                              var val = await Navigator.push(
+                                context,
+                                new MaterialPageRoute(
+                                    builder: (context) => new ViewPlay(
+                                          videoFile: videoList[index],
+                                        )),
+                              );
+                              thumpnail = [];
+                              videoList = widget.directory
+                                  .listSync()
+                                  .map((item) => item.path)
+                                  .where((item) =>
+                                      item.endsWith(".MP4") ||
+                                      item.endsWith(".mp4"))
+                                  .toList();
+
+                              for (int i = 0; i < videoList.length; i++) {
+                                thumpnail.add(Image.asset(
+                                    "assets/images/video_loader.gif"));
+                              }
+
+                              await getdata();
+                            }
+                          },
+                        ),
+                      ),
+                    ])),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

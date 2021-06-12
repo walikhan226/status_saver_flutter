@@ -14,7 +14,8 @@ class ImageScreen extends StatefulWidget {
   ImageScreenState createState() => new ImageScreenState();
 }
 
-class ImageScreenState extends State<ImageScreen> {
+class ImageScreenState extends State<ImageScreen>
+    with AutomaticKeepAliveClientMixin<ImageScreen> {
   Directory _photoDir;
   @override
   void initState() {
@@ -43,51 +44,63 @@ class ImageScreenState extends State<ImageScreen> {
           .toList(growable: false);
 
       if (imageList.length > 0) {
-        return Container(
-          padding: EdgeInsets.only(bottom: 60.0),
-          child: StaggeredGridView.countBuilder(
-            padding: EdgeInsets.all(8.0),
-            itemCount: imageList.length,
-            crossAxisCount: 4,
-            itemBuilder: (context, index) {
-              String imgPath = imageList[index];
-              return Material(
-                elevation: 8.0,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                child: InkWell(
-                  onTap: () async {
-                    if (widget.state == 'main') {
-                      Navigator.push(
-                          context,
-                          new MaterialPageRoute(
-                              builder: (context) => new ViewPhotos(imgPath)));
-                      return;
-                    }
+        return RefreshIndicator(
+          onRefresh: () async {
+            imageList = [];
+            imageList = await _photoDir
+                .listSync()
+                .reversed
+                .map((item) => item.path)
+                .where((item) => item.endsWith(".jpg"))
+                .toList(growable: false);
+            setState(() {});
+          },
+          child: Container(
+            padding: EdgeInsets.only(bottom: 60.0),
+            child: StaggeredGridView.countBuilder(
+              padding: EdgeInsets.all(8.0),
+              itemCount: imageList.length,
+              crossAxisCount: 4,
+              itemBuilder: (context, index) {
+                String imgPath = imageList[index];
+                return Material(
+                  elevation: 8.0,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  child: InkWell(
+                    onTap: () async {
+                      if (widget.state == 'main') {
+                        Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (context) => new ViewPhotos(imgPath)));
+                        return;
+                      }
 
-                    if (widget.state == 'download') {
-                      var val = await Navigator.push(
-                              context,
-                              new MaterialPageRoute(
-                                  builder: (context) => new ImageView(imgPath)))
-                          .then((value) {
-                        setState(() {});
-                      });
-                      return;
-                    }
-                  },
-                  child: Hero(
-                      tag: imgPath,
-                      child: Image.file(
-                        File(imgPath),
-                        fit: BoxFit.cover,
-                      )),
-                ),
-              );
-            },
-            staggeredTileBuilder: (i) =>
-                StaggeredTile.count(2, i.isEven ? 2 : 3),
-            mainAxisSpacing: 8.0,
-            crossAxisSpacing: 8.0,
+                      if (widget.state == 'download') {
+                        var val = await Navigator.push(
+                            context,
+                            new MaterialPageRoute(
+                                builder: (context) =>
+                                    new ImageView(imgPath))).then((value) {
+                          setState(() {});
+                        });
+                        return;
+                      }
+                    },
+                    child: Hero(
+                        tag: imgPath,
+                        child: Image.file(
+                          File(imgPath),
+                          fit: BoxFit.cover,
+                        )),
+                  ),
+                );
+              },
+              staggeredTileBuilder: (i) =>
+                  StaggeredTile.count(2, i.isEven ? 2 : 3),
+              mainAxisSpacing: 8.0,
+              crossAxisSpacing: 8.0,
+            ),
           ),
         );
       } else {
@@ -104,4 +117,8 @@ class ImageScreenState extends State<ImageScreen> {
       }
     }
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

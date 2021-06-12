@@ -86,21 +86,19 @@ class _ViewPlayState extends State<ViewPlay> {
                 var file = File(widget.videoFile);
 
                 if (await file.exists()) {
-                  await file.delete().then((value) {
+                  await file.delete().then((v) {
                     Navigator.pop(context);
-
-                    setState(() {});
                   });
                 }
               } catch (e) {
                 print(e);
               }
 
-              try {
-                showInterstitialAd();
-              } catch (e) {
-                print(e.toString());
-              }
+              // try {
+              //   showInterstitialAd();
+              // } catch (e) {
+              //   print(e.toString());
+              // }
             },
           ),
           IconButton(
